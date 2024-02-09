@@ -4,7 +4,7 @@ Currently supports constructing dummy materials by importing the JSON files corr
 
 For making custom MIs, you want to be able to edit texture, vector, or scalar parameters.  One way to do this is to follow the "MI Parent Swapping" approach described in [https://github.com/CDDTreborn/Tekken7_PC-Modding-Guides/wiki/Info-for-Modders-T8](https://github.com/CDDTreborn/Tekken7_PC-Modding-Guides/wiki/Info-for-Modders-T8) to set up a dummy material with the same name as an in-game material, add parameters for each parameter you will want to change, and then create instances of that dummy material in which you change those parameters.  You need to make sure you get every parameter name exactly right and there can be a large number of parameters for each material.  I have now automated this process for you.
 
-1) Clone this repository into your UE project so that the Python scripts are in the Contents/Python directory.
+1) Clone this repository into your UE project so that the Python scripts are in the Content/Python directory.
    
 2) Make sure your "Python Editor Script Plugin" is enabled.
 ![Screenshot (2326)](https://github.com/peek6/Json2DA/assets/28815226/251e4ac1-fe8e-4dce-9f0b-a2e4b1f86714)
