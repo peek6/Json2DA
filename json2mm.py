@@ -63,9 +63,6 @@ def generateInputNodes(data : dict):
 
         node = create_node(MaterialExpressions.TextureSampleParameter2D, len(all_final_nodes), p["ParameterInfo"]["Name"], asset, "Texture")
 
-
-
-        #texture = unreal.EditorAssetLibrary.load_asset(“/Game/Brushes/CustomBrushes/Textures/alphabrush”)
         #node.set_editor_property(slot_name, asset)
 
         node.set_editor_property("SamplerSource", unreal.SamplerSourceMode.SSM_WRAP_WORLD_GROUP_SETTINGS)
