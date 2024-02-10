@@ -41,35 +41,39 @@ def generateInputNodes(data : dict):
 
     for p in data["TextureParameterValues"]:
 
-        obj_type, obj_name = p["ParameterValue"]["ObjectName"].split("'")[:2]
-        
-        print(f"Processing texture {obj_name}...")
-        obj_path = p["ParameterValue"]["ObjectPath"]
-        print(f"Path={obj_path}")
+        # print("Processing "+p["ParameterValue"]["ObjectName"])
+        if not (p["ParameterValue"] is None):
+            obj_type, obj_name = p["ParameterValue"]["ObjectName"].split("'")[:2]
+            # print("Received object with type "+obj_type)
+            # print("Received object with name "+obj_name)
 
-        full_path = obj_path.split(".")[0] + "." + obj_name
-        asset = unreal.load_asset(f"{obj_type}'{full_path}'")
+            print(f"Processing texture {obj_name}...")
+            obj_path = p["ParameterValue"]["ObjectPath"]
+            print(f"Path={obj_path}")
 
-        if asset is None:
-            folder = "/".join(obj_path.split(".")[0].split("/")[:-1])
-            asset = try_create_asset(folder, obj_name, obj_type)
-            print(asset)
-            if asset is not None: 
-                unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+            full_path = obj_path.split(".")[0] + "." + obj_name
+            asset = unreal.load_asset(f"{obj_type}'{full_path}'")
 
-        slot_name =  p["ParameterInfo"]["Name"]
+            if asset is None:
+                folder = "/".join(obj_path.split(".")[0].split("/")[:-1])
+                asset = try_create_asset(folder, obj_name, obj_type)
+                print(asset)
+                if asset is not None:
+                    unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
 
-        print(f"Adding texture {full_path} to slot {slot_name}")
+            slot_name =  p["ParameterInfo"]["Name"]
 
-        node = create_node(MaterialExpressions.TextureSampleParameter2D, len(all_final_nodes), p["ParameterInfo"]["Name"], asset, "Texture")
+            print(f"Adding texture {full_path} to slot {slot_name}")
 
-        #node.set_editor_property(slot_name, asset)
+            node = create_node(MaterialExpressions.TextureSampleParameter2D, len(all_final_nodes), p["ParameterInfo"]["Name"], asset, "Texture")
 
-        node.set_editor_property("SamplerSource", unreal.SamplerSourceMode.SSM_WRAP_WORLD_GROUP_SETTINGS)
+            #node.set_editor_property(slot_name, asset)
 
-        all_final_nodes.append(
-            node
-        )
+            node.set_editor_property("SamplerSource", unreal.SamplerSourceMode.SSM_WRAP_WORLD_GROUP_SETTINGS)
+
+            all_final_nodes.append(
+                node
+            )
 
 
     return all_final_nodes
