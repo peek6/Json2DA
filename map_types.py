@@ -10,6 +10,18 @@ ARRAY_TYPES = {
     "RegionNames": {
         "Key": "",
         "Value": "str"
+    },
+    "DesignAssignSlotArray":{
+        "Key": "",
+        "Value": "DesignAssignSlotArray"
+    },
+    "AssignPerMaterialArray": {
+        "Key": "",
+        "Value": "AssignPerMaterialArray"
+    },
+    "DesignAssignArray": {
+        "Key": "",
+        "Value": "DesignAssignArray"
     }
 }
 
@@ -147,6 +159,14 @@ MAP_TYPES = {
         "Value": ""
     },
     "TextureOverrides": {
+        "Key": "",
+        "Value": "__AssetRef"
+    },
+    "Assign_Pattern": {
+        "Key": "",
+        "Value": "__AssetRef"
+    },
+    "Assign_Detail_AO_Normal_Map": {
         "Key": "",
         "Value": "__AssetRef"
     }

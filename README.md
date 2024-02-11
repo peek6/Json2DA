@@ -1,6 +1,14 @@
+# Python Scripts for Importing Custom Datatypes and Material Instances into Tekken 8 
+
 This is a set of Python scripts for automating the importing of assets into UE.  It is based on scripts written for Hogwarts Legacy, now ported into UE 5.2 to support Tekken 8.  
 
-Currently supports constructing dummy materials by importing the JSON files corresponding to material instances.  Importing other custom Tekken 8 datatypes is not supported yet, but I am working on it now.
+Currently supports:
+1) constructing dummy materials by importing the JSON files corresponding to material instances.  
+2) importing CustomizeItem (CI) objects from their JSON files, which are used, for example, to overwrite material instances and set whether they are colorable.
+
+Importing other custom Tekken 8 datatypes is not supported yet, but I am working on it now.
+
+## Importing Materials
 
 For making custom MIs, you want to be able to edit texture, vector, or scalar parameters.  One way to do this is to follow the "MI Parent Swapping" approach described in [https://github.com/CDDTreborn/Tekken7_PC-Modding-Guides/wiki/Info-for-Modders-T8](https://github.com/CDDTreborn/Tekken7_PC-Modding-Guides/wiki/Info-for-Modders-T8) to set up a dummy material with the same name as an in-game material, add parameters for each parameter you will want to change, and then create instances of that dummy material in which you change those parameters.  You need to make sure you get every parameter name exactly right and there can be a large number of parameters for each material.  I have now automated this process for you.
 
@@ -16,3 +24,18 @@ For making custom MIs, you want to be able to edit texture, vector, or scalar pa
 ![Screenshot (2328)](https://github.com/peek6/Json2DA/assets/28815226/42abb7ae-1ae1-484e-8c26-2b89e2406af4)
 
 5) Create any instances of this parent MI that you want to customize and then customize these instances as you like by setting the parameters as desired.  You should be able to see the default values for each parameter and texture that will be inherited from the parent if you don't change them.  Make sure to overwrite anything you want to change.  Package your inherited customized instances with your chunk, but do not package the parents, so that the game will use the real parent MIs rather than your dummy ones.
+
+## Importing CustomizeItem (CI) Objects
+
+The import_ci.py creates and imports CIs from their Fmodel JSON files into UE so that we can mod them. For example, we can now make MIs which were different from those in the original mesh colorable again.
+
+To mod CIs:
+1) Clone this repository into your UE project so that the Python scripts are in the Content/Python directory.
+2) Open the import_ci.py script and edit export_root to point to the root (e.g., parent dir of Content) in your Fmodel JSON extraction folder.
+3) List the assets you want to import in the assets_to_import variable, using the convention shown in the script.  I recommend not doing too many at once (and starting with one). 
+4) Go into UE and at the command prompt in the Output Log, change the prompt type to Python and run import_ci.py
+5) You can then edit the CIs however you want and package them with your mod.  You can also hack the JSON directly before you import it.
+ 
+Some caveats:
+1) The CIs need to point to material instances, not materials.  Make sure any MIs pointed to by the script are not already in your UE as materials (e.g., if you've been using them as dummy parents) or the script will crash.  Back them up and then make material instances out of them first before running the script.
+2) This script recursively goes through the CI JSON and creates all the custom objects and populates them.  These CIs can be deep, so the script can take a while and can crash your editor.  You've been warned.  I recommend not trying to import too many CIs at once.
