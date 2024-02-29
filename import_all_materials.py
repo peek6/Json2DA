@@ -197,18 +197,18 @@ def main():
     
     # First create the master material in UE, then recursively create all its child material instances in UE, always creating parents before children
 
-    mm_name = 'M_CH_skin_V3'
-    #for mm_name in master_materials:
-    mm_obj = master_materials[mm_name]
-    print("Creating UE material "+mm_name)
-    #create_ue_material(mm_obj, texture_root)
-    # recursively go through tree for each MM, add parent, then add children.  They are all MIs since I added the MM above.
-    for child_name in mm_obj.children:
-        mi_obj = mm_obj.children[child_name]
-        # recursively_create_material_instances(mi_obj, texture_root)
+    #mm_name = 'M_CH_skin_V3'
+    for mm_name in master_materials:
+        mm_obj = master_materials[mm_name]
+        print("Creating UE material "+mm_name)
+        create_ue_material(mm_obj, texture_root)
+        # recursively go through tree for each MM, add parent, then add children.  They are all MIs since I added the MM above.
+        for child_name in mm_obj.children:
+            mi_obj = mm_obj.children[child_name]
+            recursively_create_material_instances(mi_obj, texture_root)
 
-    create_ue_material_instance(material_instances['MI_CH_kal_face_skin'], texture_root)
-    create_ue_material_instance(material_instances['MI_CH_kal_arm_skin'], texture_root)
+    #create_ue_material_instance(material_instances['MI_CH_kal_face_skin'], texture_root)
+    #create_ue_material_instance(material_instances['MI_CH_kal_arm_skin'], texture_root)
 
     return master_materials, material_instances
 
