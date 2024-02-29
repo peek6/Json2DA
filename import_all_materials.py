@@ -5,7 +5,8 @@
 
 # Usage:
 #  - Use Fmodel to extract all JSON files for all MMs and MIs.
-#  - Point export_root to the root of the Content folder in your Fmodel extraction directory
+#  - Point json_root to the root of the Content folder in your Fmodel extraction directory
+#  - Point texture_root to the root of the Game folder in your Umodel texture extraction directory
 #  - Back up all textures in your project
 #  - Back up and then delete all materials and material instances in your project
 #  - Run this script from inside your UE project
@@ -17,6 +18,7 @@ import shutil
 import re
 import json
 from pathlib import Path
+from MaterialClasses import Material, MaterialInstance
 
 
 import importlib
@@ -26,8 +28,9 @@ import materialutil
 importlib.reload(MaterialExpressions)
 importlib.reload(materialutil)
 
-from materialutil import connectNodesUntilSingle, generateInputNodes_modular
-from utils import try_create_asset
+from materialutil import create_ue_material, create_ue_material_instance, recursively_create_material_instances
+
+
 
 AssetTools = unreal.AssetToolsHelpers.get_asset_tools()
 MEL = unreal.MaterialEditingLibrary
@@ -37,172 +40,46 @@ material_util = unreal.MaterialEditingLibrary()
 
 
 # TODO: Set this to root of Content in Fmodel JSON extraction folder
-export_root = r"D:\modding\T8_Demo\Exports\Polaris"
+json_root = r"D:\modding\T8_Demo\Exports\Polaris"
+
+# TODO: Set this to root of Game in Umodel texture extraction folder
+texture_root = r"D:\modding\T8\vanilla_textures"
+
 
 param_types = ['ScalarParameterValues', 'TextureParameterValues', 'VectorParameterValues']
 
-class Material:
-    def __init__(self, asset_path, asset_name, json_path):
-        self.asset_path = asset_path
-        self.asset_name = asset_name
-        self.asset_type = 'Material'
-        self.json_path = json_path
-        self.children = {} # dictionary keyed by asset name of the immediate children of this material
-        self.data = {} # data list of parameters compatible with method to create the material in UE
-        self.data_dict = {} # data dictionary of parameters for easier merging (to avoid duplicate parameters)
-
-class MaterialInstance:
-    def __init__(self, asset_path, asset_name, json_path):
-        self.asset_path = asset_path
-        self.asset_name = asset_name
-        self.asset_type = 'MaterialInstanceConstant'
-        self.json_path = json_path
-        self.children = {}  # dictionary keyed by asset name of the immediate children of this material instance
-        self.parent = None # pointer to parent object of this MI
-        self.data = {} # data list of parameters compatible with method to create the material instance in UE
-        self.data_dict = {} # data dictionary of parameters for easier merging (to avoid duplicate parameters)
-
-
-def load_texture(obj_path, obj_name):
-    obj_type = "Texture2D"
-    full_path = obj_path + obj_name + "." + obj_name
-    return unreal.load_asset(f"{obj_type}'{full_path}'")
-
-def load_mi(obj_path, obj_name):
-    obj_type = "MaterialInstanceConstant"
-    full_path = obj_path + obj_name + "." + obj_name
-    return unreal.load_asset(f"{obj_type}'{full_path}'")
-
-def load_material(obj_path, obj_name):
-    obj_type = "Material"
-    full_path = obj_path + obj_name + "." + obj_name
-    return unreal.load_asset(f"{obj_type}'{full_path}'")
-
-# Create the dummy master material in UE from the merged master material object
-def create_ue_material(mm_obj):
-
-    mat = try_create_asset(mm_obj.asset_path, mm_obj.asset_name, 'Material')
-
-    data = mm_obj.data
-
-    MEL.delete_all_material_expressions(mat)
-    nodes = generateInputNodes_modular(mat,data)
-    final_node = connectNodesUntilSingle(mat, nodes)
-    if final_node is not None:
-        MEL.connect_material_property(final_node, "", unreal.MaterialProperty.MP_BASE_COLOR)
-    else:
-        print("WARNING: There are no parameters in Material "+mm_obj.asset_name)
-    unreal.EditorAssetLibrary.save_loaded_asset(mat, False)
-
-# Create the material instance in UE from the merged material instance object
-def create_ue_material_instance(mi_obj):
-
-    my_mi = try_create_asset(mi_obj.asset_path, mi_obj.asset_name, 'MaterialInstanceConstant')
-
-
-    # set parent
-    parent_obj = mi_obj.parent
-    if parent_obj is not None:
-        #parent_name = parent_obj.asset_name
-        if parent_obj.asset_type == 'Material': #parent_name in master_materials:
-            #parent_obj = master_materials[parent_name]
-            parent_mi = load_material(parent_obj.asset_path, parent_obj.asset_name)
-            material_util.set_material_instance_parent(my_mi, parent_mi)
-        elif parent_obj.asset_type == 'MaterialInstanceContent': # parent_name in material_instances:
-            # parent_obj = material_instances[parent_name]
-            parent_mi = load_mi(parent_obj.asset_path, parent_obj.asset_name)
-            material_util.set_material_instance_parent(my_mi, parent_mi)
-        else:
-            print("WARNING:  Parent object has invalid asset type "+parent_obj.asset_type+" for MI " + mi_obj.asset_name)
-    else:
-        print("WARNING:  No parent set for MI " + mi_obj.asset_name)
-
-    data_dict = mi_obj.data_dict
-
-    # set ScalarParameterValues
-    for key in data_dict['ScalarParameterValues']:
-        if 'ParameterValue' in data_dict['ScalarParameterValues'][key]:
-            material_util.set_material_instance_scalar_parameter_value(my_mi, key, data_dict['ScalarParameterValues'][key]['ParameterValue'])
-        else:
-            print("WARNING:  Scalar Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
-
-    # set VectorParameterValues
-    for key in data_dict['VectorParameterValues']:
-        if 'ParameterValue' in data_dict['VectorParameterValues'][key]:
-            dict_with_rgba = data_dict['VectorParameterValues'][key]['ParameterValue']
-            material_util.set_material_instance_vector_parameter_value(my_mi, key, unreal.LinearColor(r=dict_with_rgba['R'], g=dict_with_rgba['G'], b=dict_with_rgba['B'], a=dict_with_rgba['A']))
-        else:
-            print("WARNING:  Vector Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
-
-    # set TextureParameterValues
-    for key in data_dict['TextureParameterValues']:
-        p = data_dict['TextureParameterValues'][key]
-        if 'ParameterValue' in p:
-            if not (p["ParameterValue"] is None):
-                obj_type, obj_name = p["ParameterValue"]["ObjectName"].split("'")[:2]
-                # print("Received object with type "+obj_type)
-                # print("Received object with name "+obj_name)
-
-                #print(f"Processing texture {obj_name}...")
-                obj_path = p["ParameterValue"]["ObjectPath"]
-                #print(f"Path={obj_path}")
-
-                full_path = obj_path.split(".")[0] + "." + obj_name
-                asset = unreal.load_asset(f"{obj_type}'{full_path}'")
-
-                if asset is None:
-                    folder = "/".join(obj_path.split(".")[0].split("/")[:-1])
-                    asset = try_create_asset(folder, obj_name, obj_type)
-                    #print(asset)
-                    if asset is not None:
-                        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
-
-                # slot_name = p["ParameterInfo"]["Name"]
-
-                #print(f"Adding texture {full_path} to slot {slot_name}")
-
-                material_util.set_material_instance_texture_parameter_value(my_mi, key , asset)
-            else:
-                print("WARNING:  Texture Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
-
-
-
-    unreal.EditorAssetLibrary.save_loaded_asset(my_mi, False)
-    return
-
-# recursively create all material instances in UE, creating parents before children
-def recursively_create_material_instances(mi_obj):
-
-    # create instance for parent
-    create_ue_material_instance(mi_obj)
-    # recursively create instances for children
-    for child_name in mi_obj.children:
-        recursively_create_material_instances(mi_obj.children[child_name])
-    return
-
 # recursively traverse the Fmodel extraction directory and initialize all the material and material instance objects
 def initialize_material_classes():
-    p = Path(export_root)
+    p = Path(json_root)
 
     master_materials = {}
     material_instances = {}
 
     for file in p.glob('**/M_*.json'):
         json_path = str(file)
-        tokens = json_path.split('\\')
-        asset_name = tokens[-1].split('.')[0]
-        tokens_after_content = []
-        found_content = False
-        for token in tokens[:-1]:
-            if (token == 'Content'):
-                found_content = True
-                tokens_after_content.append('Game')
+        with open(json_path, "r+") as fp:
+            global_asset_type = json.load(fp)[0]["Type"]
+            tokens = json_path.split('\\')
+            asset_name = tokens[-1].split('.')[0]
+            tokens_after_content = []
+            found_content = False
+            for token in tokens[:-1]:
+                if (token == 'Content'):
+                    found_content = True
+                    tokens_after_content.append('Game')
+                else:
+                    if (found_content):
+                        tokens_after_content.append(token)
+            asset_path = '/' + '/'.join(tokens_after_content) + '/'
+            if(global_asset_type == "Material"):
+                new_material = Material(asset_path, asset_name, json_path)
+                master_materials[asset_name] = new_material
+            elif (global_asset_type == "MaterialInstanceConstant"):
+                new_material_instance = MaterialInstance(asset_path, asset_name, json_path)
+                material_instances[asset_name] = new_material_instance
+                print("WARNING: " + asset_name + " is actually an MI.  Adding it there instead.")
             else:
-                if (found_content):
-                    tokens_after_content.append(token)
-        asset_path = '/' + '/'.join(tokens_after_content) + '/'
-        new_material = Material(asset_path, asset_name, json_path)
-        master_materials[asset_name] = new_material # .append(new_material)
+                print("WARNING: " + asset_name+" is not a Material.  Skipping.")
 
     for file in p.glob('**/MI_*.json'):
         json_path = str(file)
@@ -259,42 +136,48 @@ def main():
         # open the JSON file for that material instance as a dict and populate its parent
         mi_obj = material_instances[mi_name]
         with open(mi_obj.json_path, "r+") as fp:
-            data = json.load(fp)[0]["Properties"]
-            mi_obj.data = data
-            # Convert data list into data dictionary for easier merging (to avoid duplicate parameters)
-            for global_my_type in param_types:
-                mi_obj.data_dict[global_my_type] = {}
-                if(global_my_type in data):
-                    for list_item in data[global_my_type]:
-                        mi_obj.data_dict[global_my_type][list_item["ParameterInfo"]["Name"]] = list_item
-    
-            if 'Parent' in data:
-                if 'ObjectName' in data['Parent']:
-                    temp_list = data['Parent']['ObjectName'].split("'")
-                    global_my_type = temp_list[0]
-                    my_parent_name = temp_list[1]
-    
-                    if global_my_type == 'Material':
-                        if my_parent_name in master_materials:
-                            my_parent_obj = master_materials[my_parent_name]
-                            mi_obj.parent = my_parent_obj  # my_parent_name
-                            my_parent_obj.children[mi_name] = mi_obj
+            my_temp = json.load(fp)[0]
+            data = my_temp["Properties"]
+            global_asset_type = my_temp["Type"]
+            # Sanity check that this is actually an MI
+            if(global_asset_type == "MaterialInstanceConstant"):
+                mi_obj.data = data
+                # Convert data list into data dictionary for easier merging (to avoid duplicate parameters)
+                for global_my_type in param_types:
+                    mi_obj.data_dict[global_my_type] = {}
+                    if(global_my_type in data):
+                        for list_item in data[global_my_type]:
+                            mi_obj.data_dict[global_my_type][list_item["ParameterInfo"]["Name"]] = list_item
+                if 'Parent' in data:
+                    if 'ObjectName' in data['Parent']:
+                        temp_list = data['Parent']['ObjectName'].split("'")
+                        global_my_type = temp_list[0]
+                        my_parent_name = temp_list[1]
+
+                        if global_my_type == 'Material':
+                            if my_parent_name in master_materials:
+                                my_parent_obj = master_materials[my_parent_name]
+                                mi_obj.parent = my_parent_obj  # my_parent_name
+                                my_parent_obj.children[mi_name] = mi_obj
+                            else:
+                                print("WARNING:  Cannot find parent material " + my_parent_name + " for MI " + mi_name)
+                        elif global_my_type=='MaterialInstanceConstant':
+                            if my_parent_name in material_instances:
+                                my_parent_obj = material_instances[my_parent_name]
+                                mi_obj.parent = my_parent_obj
+                                my_parent_obj.children[mi_name] = mi_obj
+                            else:
+                                print("WARNING:  Cannot find parent material instance " + my_parent_name + " for MI " + mi_name)
                         else:
-                            print("WARNING:  Cannot find parent material " + my_parent_name + " for MI " + mi_name)
-                    elif global_my_type=='MaterialInstanceConstant':
-                        if my_parent_name in material_instances:
-                            my_parent_obj = material_instances[my_parent_name]
-                            mi_obj.parent = my_parent_obj
-                            my_parent_obj.children[mi_name] = mi_obj
-                        else:
-                            print("WARNING:  Cannot find parent material instance " + my_parent_name + " for MI " + mi_name)
+                            print("WARNING:  Unknown type "+ global_my_type +" for MI " + mi_name)
+
                     else:
-                        print("WARNING:  Unknown type "+ global_my_type +" for MI " + mi_name)
-    
+                        print("WARNING:  No parent name for MI " + mi_name)
                 else:
-                    print("WARNING:  No parent name for MI " + mi_name)
+                    print("WARNING:  No parent data for MI "+mi_name)
             else:
-                print("WARNING:  No parent data for MI "+mi_name)
+                print("WARNING: " + mi_name+" is not a MaterialInstanceConstant.  Skipping.")
+                del material_instances[mi_name]
     
     
     # For each material, traverse the tree starting from that material as root, and merge
@@ -313,15 +196,24 @@ def main():
     
     
     # First create the master material in UE, then recursively create all its child material instances in UE, always creating parents before children
-    for mm_name in master_materials:
-        mm_obj = master_materials[mm_name]
-        create_ue_material(mm_obj)
-        # recursively go through tree for each MM, add parent, then add children.  They are all MIs since I added the MM above.
-        for child_name in mm_obj.children:
-            mi_obj = mm_obj.children[child_name]
-            recursively_create_material_instances(mi_obj)
 
-main()
+    mm_name = 'M_CH_skin_V3'
+    #for mm_name in master_materials:
+    mm_obj = master_materials[mm_name]
+    print("Creating UE material "+mm_name)
+    #create_ue_material(mm_obj, texture_root)
+    # recursively go through tree for each MM, add parent, then add children.  They are all MIs since I added the MM above.
+    for child_name in mm_obj.children:
+        mi_obj = mm_obj.children[child_name]
+        # recursively_create_material_instances(mi_obj, texture_root)
+
+    create_ue_material_instance(material_instances['MI_CH_kal_face_skin'], texture_root)
+    create_ue_material_instance(material_instances['MI_CH_kal_arm_skin'], texture_root)
+
+    return master_materials, material_instances
+
+
+master_materials, material_instances = main()
 
 
 
