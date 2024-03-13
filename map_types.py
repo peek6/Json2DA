@@ -22,7 +22,42 @@ ARRAY_TYPES = {
     "DesignAssignArray": {
         "Key": "",
         "Value": "DesignAssignArray"
+    },
+    "PhoenixDynamicBoneBinariesItem": {
+        "Key": "",
+        "Value": "PhoenixDynamicBoneBinariesItem"
+    },
+    "PhoenixDynamicBoneBinary": {
+        "Key": "",
+        "Value": "PhoenixDynamicBoneBinary"
+    },
+    "ItemPrefabSet": {
+        "Key": "",
+        "Value": "ItemPrefab"
+    },
+    "RawData": {
+        "Key": "",
+        "Value": "RawData"
+    },
+    "Capsules":{
+        "Key": "",
+        "Value": "RawData"
+    },
+    "ScalarParameterValues":{
+        "Key": "",
+        "Value": "ScalarParameterValues"
+    },
+    "VectorParameterValues": {
+        "Key": "",
+        "Value": "ScalarParameterValues"
+    },
+    "TextureParameterValues": {
+        "Key": "",
+        "Value": "TextureParameterValues"
     }
+
+
+
 }
 
 MAP_TYPES = {
@@ -222,6 +257,12 @@ FACTORY_MAP = {
     "AudioSynesthesiaNRTSettings": [
         "AudioSynesthesiaNRTSettingsFactory"
     ],
+    "BaseCharacterItem": [
+        "BaseCharacterItemFactory"
+    ],
+    "BaseItem": [
+        "BaseItemFactory"
+    ],
     "BasicOverlays": [
         "BasicOverlaysFactory",
         "BasicOverlaysFactoryNew",
@@ -307,6 +348,12 @@ FACTORY_MAP = {
     ],
     "CurveVector": [
         "CurveVectorFactory"
+    ],
+    "CustomizeItem": [
+        "CustomizeItemFactory"
+    ],
+    "CustomizeSet": [
+        "CustomizeSetFactory"
     ],
     "DataAsset": [
         "DataAssetFactory"
@@ -396,6 +443,9 @@ FACTORY_MAP = {
     ],
     "InterpData": [
         "InterpDataFactoryNew"
+    ],
+    "ItemPrefab": [
+      "ItemPrefabFactory"
     ],
     "LandscapeGrassType": [
         "LandscapeGrassTypeFactory"

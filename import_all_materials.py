@@ -148,6 +148,11 @@ def main():
                     if(global_my_type in data):
                         for list_item in data[global_my_type]:
                             mi_obj.data_dict[global_my_type][list_item["ParameterInfo"]["Name"]] = list_item
+                if "SubsurfaceProfile" in data:
+                    print("Found SubsurfaceProfile in MI")
+                    mi_obj.data_dict["SubsurfaceProfile"] = {}
+                    mi_obj.data_dict["SubsurfaceProfile"]["ObjectName"] = mi_obj.data["SubsurfaceProfile"]["ObjectName"]
+                    mi_obj.data_dict["SubsurfaceProfile"]["ObjectPath"] = mi_obj.data["SubsurfaceProfile"]["ObjectPath"]
                 if 'Parent' in data:
                     if 'ObjectName' in data['Parent']:
                         temp_list = data['Parent']['ObjectName'].split("'")

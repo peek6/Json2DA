@@ -25,7 +25,17 @@ import json
 def main():
     # TODO: Set this before running the script
     json_paths = [
-        r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\cf0\bdu\CI_cf0_bdu_f_mlongcoat_herringbone.json",
+        r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\model\unique\cat\face\cat_fac\materials\MI_cat_face_test.json"
+        
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\kal\bdf\CI_kal_bdf_1p_p.json",
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\kal\bdf\CI_kal_bdf_1p_v2.json",
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\KAL\materials\MI_CH_kal_arm_skin.json",
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\KAL\materials\MI_CH_kal_body_skin.json",
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\KAL\materials\MI_CH_kal_foot_skin.json",
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\KAL\materials\MI_CH_kal_hand_skin.json",
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\KAL\materials\MI_CH_kal_leg_skin.json"
+
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\cf0\bdu\CI_cf0_bdu_f_mlongcoat_herringbone.json",
         ]
     for json_path in json_paths:
         tokens = json_path.split('\\')
@@ -39,8 +49,8 @@ def main():
             else:
                 if(found_content):
                     tokens_after_content.append(token)
-        asset_path = '/'+'/'.join(tokens_after_content)+'/'
-        print("Importing " + json_path +" into "+asset_path+asset_name)
+        asset_path = '/'+'/'.join(tokens_after_content) # +'/'
+        print("Importing " + json_path +" into "+asset_path+'/'+asset_name)
         tekken8_import_utils.generic_tekken8_importer(json_path, asset_name, asset_path)
 
 main()

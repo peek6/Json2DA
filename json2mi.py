@@ -6,7 +6,18 @@ import materialutil
 importlib.reload(MaterialExpressions)
 importlib.reload(materialutil)
 from materialutil import connectNodesUntilSingle
-from utils import try_create_asset
+import utils
+import MaterialClasses
+import tekken8_import_utils
+importlib.reload(utils)
+importlib.reload(tekken8_import_utils)
+importlib.reload(MaterialClasses)
+importlib.reload(materialutil)
+from MaterialClasses import MaterialInstance, Material
+from utils import apply, try_create_asset
+from materialutil import create_ue_material_instance
+from tekken8_import_utils import generic_tekken8_importer
+
 
 AssetTools = unreal.AssetToolsHelpers.get_asset_tools()
 MEL = unreal.MaterialEditingLibrary
@@ -81,13 +92,59 @@ def generateInputNodes(data : dict):
 
 
 def main(json_path):
-    print("=== JSON Material Instance To Dummy Master Material===")
-    with open(json_path.file_path, "r+") as fp:
-        data = json.load(fp)[0]["Properties"]
+    print("=== JSON 2 Material Instance ===")
+    # with open(json_path.file_path, "r+") as fp:
+    #    data = json.load(fp)[0]["Properties"]
     #data = json.loads(json_path)[0]["Properties"]
+
+    mi_asset = EditorUtilityLibrary.get_selected_assets()[0]
+    full_name = mi_asset.get_full_name()
+    asset_path = '/'.join(full_name.split(' ')[1].split('/')[:-1]) # full_name.split('.')[0]
+    asset_name =  full_name.split(' ')[1].split('/')[-1].split('.')[0]
+
+    print("Running generic_tekken8_importer import with JSON path = "+ json_path.file_path + ", asset_name="+asset_name+", asset_path="+asset_path)
+
+    generic_tekken8_importer(json_path.file_path, asset_name, asset_path)
+    unreal.EditorAssetLibrary.save_loaded_asset(mi_asset, True)
+
+
+'''
+    mi_obj = asset # MaterialInstance(asset_path + '/', asset_name, json_path)
+    mi_obj.data = data
+    param_types = ['ScalarParameterValues', 'TextureParameterValues', 'VectorParameterValues']
+    # Convert data list into data dictionary for easier merging (to avoid duplicate parameters)
+    for global_my_type in param_types:
+        mi_obj.data_dict[global_my_type] = {}
+        if (global_my_type in data):
+            for list_item in data[global_my_type]:
+                mi_obj.data_dict[global_my_type][list_item["ParameterInfo"]["Name"]] = list_item
+    if 'Parent' in data:
+        if 'ObjectPath' in data['Parent']:
+            parent_path = ('/').join(data['Parent']['ObjectPath'].split("/")[:-1]) + '/'
+            parent_name = data['Parent']['ObjectPath'].split("/")[-1].split('.')[0]
+        else:
+            print("WARNING:  No parent path for MI " + asset_name)
+        if 'ObjectName' in data['Parent']:
+            temp_list = data['Parent']['ObjectName'].split("'")
+            global_my_type = temp_list[0]
+            my_parent_name = temp_list[1]
+            if global_my_type == 'Material':
+                my_parent_obj = Material(parent_path, parent_name, '')
+            elif global_my_type == 'MaterialInstanceConstant':
+                my_parent_obj = MaterialInstance(parent_path, parent_name, '')
+            else:
+                print("WARNING:  Unknown type " + global_my_type + " for MI " + asset_name)
+            mi_obj.parent = my_parent_obj
+            create_ue_material_instance(mi_obj)
+        else:
+            print("WARNING:  No parent name for MI " + asset_name)
+    else:
+        print("WARNING:  No parent data for MI " + asset_name)
+
 
     MEL.delete_all_material_expressions(mat)
     nodes = generateInputNodes(data)
     final_node = connectNodesUntilSingle(mat, nodes)
     MEL.connect_material_property(final_node, "", unreal.MaterialProperty.MP_BASE_COLOR)
-    unreal.EditorAssetLibrary.save_loaded_asset(mat, True)
+'''
+

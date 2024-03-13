@@ -50,17 +50,16 @@ def connectNodesUntilSingle(mat, _nodes : list):
 # destination_path: str : Asset path
 # option: obj : Import option object. Can be None for assets that does not usually have a pop-up when importing. (e.g. Sound, Texture, etc.)
 # return: obj : The import task object
-def buildImportTask(filename='', destination_path='', options=None):
+def buildImportTask(filename='', destination_path='', destination_name='', options=None):
     task = unreal.AssetImportTask()
     task.set_editor_property('automated', True)
-    task.set_editor_property('destination_name', '')
+    task.set_editor_property('destination_name', destination_name)
     task.set_editor_property('destination_path', destination_path)
     task.set_editor_property('filename', filename)
     task.set_editor_property('replace_existing', True)
     task.set_editor_property('save', True)
     task.set_editor_property('options', options)
     return task
-
 
 def create_texture_with_factory(folder, name, clazz, factory_name):
     tools = unreal.AssetToolsHelpers.get_asset_tools()
@@ -195,8 +194,10 @@ def create_ue_material(mm_obj, texture_root=''):
 # Create the material instance in UE from the merged material instance object
 def create_ue_material_instance(mi_obj, texture_root=''):
 
+
     my_mi = try_create_asset(mi_obj.asset_path, mi_obj.asset_name, 'MaterialInstanceConstant')
 
+    print("Populating MI at "+my_mi.get_full_name())
 
     # set parent
     parent_obj = mi_obj.parent
@@ -221,11 +222,32 @@ def create_ue_material_instance(mi_obj, texture_root=''):
         print("WARNING:  No parent set for MI " + mi_obj.asset_name)
 
     data_dict = mi_obj.data_dict
+    print("data_dict=")
+    print(data_dict)
+
+    if "SubsurfaceProfile" in data_dict:
+        print("Found SubsurfaceProfile in data_dict")
+        obj_type, obj_name = data_dict["SubsurfaceProfile"]["ObjectName"].split("'")[:2]
+        # print("Received object with type "+obj_type)
+        # print("Received object with name "+obj_name)
+
+        # print(f"Processing texture {obj_name}...")
+        obj_path = '/'.join(data_dict["SubsurfaceProfile"]["ObjectPath"].split(".")[0].split('/')[:-1])
+
+        print('SSP path is ' + obj_path)
+        print('SSP name is ' + obj_name)
+        print('SSP type is ' + obj_type)
+
+        my_ssp = try_create_asset(obj_path, obj_name, obj_type)
+        my_mi.set_editor_property('override_subsurface_profile',True)
+        print("Setting SubsurfaceProfile to "+my_ssp.get_full_name())
+        my_mi.set_editor_property('subsurface_profile', my_ssp)
 
     # set ScalarParameterValues
     for key in data_dict['ScalarParameterValues']:
         if 'ParameterValue' in data_dict['ScalarParameterValues'][key]:
             material_util.set_material_instance_scalar_parameter_value(my_mi, key, data_dict['ScalarParameterValues'][key]['ParameterValue'])
+            print("Set ScalarParameterValue " + key + "="+str(data_dict['ScalarParameterValues'][key]['ParameterValue']))
         else:
             print("WARNING:  Scalar Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
 
@@ -234,6 +256,8 @@ def create_ue_material_instance(mi_obj, texture_root=''):
         if 'ParameterValue' in data_dict['VectorParameterValues'][key]:
             dict_with_rgba = data_dict['VectorParameterValues'][key]['ParameterValue']
             material_util.set_material_instance_vector_parameter_value(my_mi, key, unreal.LinearColor(r=dict_with_rgba['R'], g=dict_with_rgba['G'], b=dict_with_rgba['B'], a=dict_with_rgba['A']))
+            print("Set VectorParameterValue "+key+"=")
+            print(dict_with_rgba)
         else:
             print("WARNING:  Vector Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
 
@@ -275,6 +299,8 @@ def create_ue_material_instance(mi_obj, texture_root=''):
                 #print(f"Adding texture {full_path} to slot {slot_name}")
 
                 material_util.set_material_instance_texture_parameter_value(my_mi, key , asset)
+                print(
+                    "Set TextureParameterValue " + key + "=" + asset.get_full_name())
             else:
                 print("WARNING:  Texture Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
 

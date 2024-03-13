@@ -4,6 +4,8 @@ import importlib
 importlib.reload(map_types)
 from map_types import MAP_TYPES, FACTORY_MAP, ARRAY_TYPES
 
+material_util = unreal.MaterialEditingLibrary()
+
 def get_factory_from_class(clazz):
     for c in clazz.__mro__:
         if c.__name__ in FACTORY_MAP and len(FACTORY_MAP[c.__name__]) > 0: return FACTORY_MAP[c.__name__]
@@ -14,7 +16,47 @@ def create_with_factory(folder, name, clazz, factory_name):
     print(factory)
     return tools.create_asset(name, folder, clazz, factory)
 
+def create_generic_asset(folder, name, clazz, factory_name): # (asset_path='', unique_name=True, asset_class=None, asset_factory=None):
+    #if unique_name:
+    #    asset_path, asset_name = unreal.AssetToolsHelpers.get_asset_tools().create_unique_asset_name(base_package_name=asset_path, suffix='')
+    if not unreal.EditorAssetLibrary.does_asset_exist(asset_path=folder+'/'+name): # asset_path):
+        #path = asset_path.rsplit('/', 1)[0]
+        #name = asset_path.rsplit('/', 1)[1]
+        return unreal.AssetToolsHelpers.get_asset_tools().create_asset(asset_name=name, package_path=folder, asset_class=clazz, factory=factory_name)
+    return unreal.load_asset(folder+'/'+name)
+
+
+def write_assets_to_chunk(chunk_asset_path, chunk_asset_name, chunk_id, list_of_assets):
+
+    if chunk_asset_path[-1]=='/':
+        full_chunk_path = chunk_asset_path+chunk_asset_name
+        chunk_asset_path_slash = chunk_asset_path
+    else:
+        full_chunk_path = chunk_asset_path + '/' + chunk_asset_name
+        chunk_asset_path_slash = chunk_asset_path + '/'
+
+    if unreal.EditorAssetLibrary.does_asset_exist(asset_path=full_chunk_path):
+        chunk_asset = unreal.load_asset(full_chunk_path)
+    else:
+        chunk_asset = unreal.PrimaryAssetLabel()
+        unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(chunk_asset_name, chunk_asset_path_slash, chunk_asset)
+        unreal.EditorAssetLibrary.save_asset(full_chunk_path)
+        chunk_asset = unreal.load_asset(full_chunk_path)
+
+    chunk_asset.set_editor_property('explicit_assets', list_of_assets)
+    chunk_asset.get_editor_property('rules').set_editor_property('chunk_id', chunk_id)
+    unreal.EditorAssetLibrary.save_loaded_asset(chunk_asset, False)
+
 def try_create_asset(folder, name, type_str):
+
+    if folder[-1]=='/':
+        full_path = folder+name
+    else:
+        full_path = folder + '/' + name
+
+    if unreal.EditorAssetLibrary.does_asset_exist(asset_path=full_path):  #folder + '/' + name):
+        return unreal.load_asset(full_path) # folder + '/' + name)
+
     if not hasattr(unreal, type_str):
         unreal.log_error(f"{type_str} does not exist")
         return
@@ -42,6 +84,7 @@ def does_asset_exist(folder, name):
     return unreal.EditorAssetLibrary.does_asset_exist(folder + "/" + name)
 
 def create_linked_asset(data):
+    print("Data is "+str(data))
     obj_type, obj_name = data["ObjectName"].split("'")[:2]
     full_path = data["ObjectPath"].split(".")[0] + "." + obj_name
     asset = unreal.load_asset(f"{obj_type}'{full_path}'")
@@ -168,18 +211,10 @@ def update_map(m_prop, data, ty):
         if v_ty == 'Assign_Surface_Preset':
             my_asset = unreal.SurfacePreset()
             apply(my_asset, value)
-            #for  in data:
-            #    set_editor_property(my_struct, key,data[key])
-            # asset = unreal.CustomizeItem()
-            # apply(asset, data)
             uvalue = my_asset
         if v_ty == 'Assign_Surface_Data':
             my_asset = unreal.SurfaceData()
             apply(my_asset, value)
-            #for  in data:
-            #    set_editor_property(my_struct, key,data[key])
-            # asset = unreal.CustomizeItem()
-            # apply(asset, data)
             uvalue = my_asset
         else:
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
@@ -223,27 +258,80 @@ def update_array(m_prop, data, ty):
         print("value is "+str(value))
         if v_ty == "__AssetRef" and "ObjectName" in value:
             uvalue =  create_linked_asset(value)
-        elif v_ty == 'DesignAssignSlotArray':
+        elif v_ty == 'ItemPrefab':
+            uvalue = create_recursive_linked_asset(v_ty, value)
+            #my_struct = unreal.DesignAssignStruct()
+            #apply(my_struct, value)
+            # for  in data:
+            #    set_editor_property(my_struct, key,data[key])
+            # asset = unreal.CustomizeItem()
+            # apply(asset, data)
+            #my_folder
+            #uvalue = try_create_asset(my_folder, my_name, 'ItemPrefab')# my_struct
+        elif v_ty == 'TextureParameterValues':
+            mi_apply_texture_parameter(uvalue, value)
+            # uvalue = create_linked_asset(value)
+        elif v_ty == 'ScalarParameterValues':
+            uvalue = value if is_builtin else getattr(unreal, v_ty)()
+            if not is_builtin:
+                mi_apply_scalar_parameter(uvalue, value)
+            #if 'ParameterValue' in value['ScalarParameterValues']:
+            #    material_util.set_material_instance_scalar_parameter_value(my_mi, key,
+            #                                                               data_dict['ScalarParameterValues'][key][
+            #                                                                   'ParameterValue'])
+            #else:
+            #    print("WARNING:  Scalar Parameter Value for " + key + " not found in MI " + mi_obj.asset_name)
+            #
+            #uvalue = value
+        elif v_ty == 'VectorParameterValues':
+            mi_apply_vector_parameter(uvalue, value)
+            #temp_asset = unreal.LinearColor()
+            #apply(temp_asset, value)
+            #uvalue = temp_asset
+        elif v_ty == 'PhoenixDynamicBoneBinariesItem':
+            my_struct = unreal.DynamicBoneDataStruct() # Array(unreal.PhoenixDynamicBoneBinary) # unreal.DesignAssignStruct()
+            apply(my_struct,value)
+            uvalue = my_struct
+
+            '''
+            temp = create_linked_asset(value["Data"])
+            my_array.insert(0, temp)
+            #apply(my_array, value)
+            uvalue = my_array
+            set_editor_property(asset, key, data[key])
+            # uvalue = create_linked_asset(value["Data"])
+            # apply(uvalue, value)
+            #uvalue = value if is_builtin else  getattr(unreal, v_ty)()
+            #if not is_builtin: apply(uvalue, value)
+            '''
+
+        elif v_ty == 'RawData':
+            uvalue = value
+        elif v_ty == 'Capsules':
             # TODO:  Create a struct here
-            my_struct = unreal.DesignAssignStruct()
+            my_struct = unreal.ImportCapsuleCollisionVolume()
             apply(my_struct, value)
             #for  in data:
             #    set_editor_property(my_struct, key,data[key])
             # asset = unreal.CustomizeItem()
             # apply(asset, data)
             uvalue = my_struct
+        elif v_ty == 'DesignAssignSlotArray':
+            # TODO:  Create a struct here
+            my_struct = unreal.DesignAssignStruct()
+            apply(my_struct, value)
+            uvalue = my_struct
         elif v_ty == 'AssignPerMaterialArray':
             # TODO:  Create a struct here
             my_struct = unreal.AssignPerMaterialStruct()
             apply(my_struct, value)
-            #set_editor_property(my_struct, key,data[key])
             uvalue = my_struct
         elif v_ty == 'DesignAssignArray':
             # TODO:  Create a struct here
             my_struct = unreal.DesignAssignStruct()
             apply(my_struct, value)
-            #set_editor_property(my_struct, key,data[key])
             uvalue = my_struct
+
         else:
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
             if not is_builtin: apply(uvalue, value)
@@ -309,3 +397,63 @@ def apply(asset, data : dict):
     for key in data:
         set_editor_property(asset, key, data[key])
     
+def mi_apply_scalar_parameter(my_mi, data : dict):
+    material_util.set_material_instance_scalar_parameter_value(my_mi, data["ParameterInfo"]["Name"], data['ParameterValue'])
+    print("Running mi_apply_scalar_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())
+
+def mi_apply_vector_parameter(my_mi, data : dict):
+    dict_with_rgba = data['ParameterValue']
+    material_util.set_material_instance_vector_parameter_value(my_mi,
+                                                                   data["ParameterInfo"]["Name"],
+                                                                   unreal.LinearColor(
+                                                                        r=dict_with_rgba['R'],
+                                                                        g=dict_with_rgba['G'],
+                                                                        b=dict_with_rgba['B'],
+                                                                        a=dict_with_rgba['A']
+                                                                   )
+                                                                   )
+    print("Running mi_apply_vector_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())
+
+def mi_apply_texture_parameter(my_mi, p : dict):
+    key = p["ParameterInfo"]["Name"]
+    if 'ParameterValue' in p:
+        if not (p["ParameterValue"] is None):
+            obj_type, obj_name = p["ParameterValue"]["ObjectName"].split("'")[:2]
+            # print("Received object with type "+obj_type)
+            # print("Received object with name "+obj_name)
+
+            #print(f"Processing texture {obj_name}...")
+            obj_path = p["ParameterValue"]["ObjectPath"]
+            # windows_texture_path = (texture_root + ('\\').join(obj_path.split('/'))).split('.')[0] + '.tga'
+
+            #print(f"Path={obj_path}")
+            #print(f"windows_texture_path={windows_texture_path}")
+
+            full_path = obj_path.split(".")[0] + "." + obj_name
+            asset = unreal.load_asset(f"{obj_type}'{full_path}'")
+
+            if asset is None:
+                folder = "/".join(obj_path.split(".")[0].split("/")[:-1])
+                asset = try_create_asset(folder, obj_name, obj_type)
+
+            if asset is not None:
+                unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+
+            # slot_name = p["ParameterInfo"]["Name"]
+
+            #print(f"Adding texture {full_path} to slot {slot_name}")
+
+            material_util.set_material_instance_texture_parameter_value(my_mi, key , asset)
+
+
+    dict_with_rgba = data['ParameterValue']
+    material_util.set_material_instance_vector_parameter_value(my_mi,
+                                                                   data["ParameterInfo"]["Name"],
+                                                                   unreal.LinearColor(
+                                                                        r=dict_with_rgba['R'],
+                                                                        g=dict_with_rgba['G'],
+                                                                        b=dict_with_rgba['B'],
+                                                                        a=dict_with_rgba['A']
+                                                                   )
+                                                                   )
+    print("Running mi_apply_vector_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())
