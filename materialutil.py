@@ -243,6 +243,9 @@ def create_ue_material_instance(mi_obj, texture_root=''):
         print("Setting SubsurfaceProfile to "+my_ssp.get_full_name())
         my_mi.set_editor_property('subsurface_profile', my_ssp)
 
+        my_mi.get_editor_property('base_property_overrides').set_editor_property('shading_model',
+                                                                                 unreal.MaterialShadingModel.MSM_SUBSURFACE_PROFILE) # TODO:  is this always correct if SubsurfaceProfile is in the JSON ?
+
     # set ScalarParameterValues
     for key in data_dict['ScalarParameterValues']:
         if 'ParameterValue' in data_dict['ScalarParameterValues'][key]:

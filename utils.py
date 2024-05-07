@@ -131,7 +131,10 @@ def get_typestr_from_name(name : str):
 def str_to_enum(val):
     enum_type, enum_val = val.split("::")
     enum_type = enum_type[1:]
-    return getattr(getattr(unreal, enum_type), enum_val)
+    if enum_type == 'MaterialShadingModel' and enum_val=='MSM_SubsurfaceProfile':
+        return unreal.MaterialShadingModel.MSM_SUBSURFACE_PROFILE
+    else:
+        return getattr(getattr(unreal, enum_type), enum_val)
 
 def try_get_map_value_type(map_obj, key):
     try:
@@ -155,6 +158,8 @@ def try_get_map_type(obj, key):
     map_obj = obj.get_editor_property(key)
     if key in MAP_TYPES:
         return MAP_TYPES[key]
+
+    print("ERROR:  Did not find key "+str(key)+" in MAP_TYPES")
     
     try:
         map_obj["_"] = {}
@@ -258,6 +263,8 @@ def update_array(m_prop, data, ty):
         print("value is "+str(value))
         if v_ty == "__AssetRef" and "ObjectName" in value:
             uvalue =  create_linked_asset(value)
+            #elif v_ty == 'OverrideMaterials':
+            #    uvalue = create_linked_asset(value)
         elif v_ty == 'ItemPrefab':
             uvalue = create_recursive_linked_asset(v_ty, value)
             #my_struct = unreal.DesignAssignStruct()
@@ -268,26 +275,6 @@ def update_array(m_prop, data, ty):
             # apply(asset, data)
             #my_folder
             #uvalue = try_create_asset(my_folder, my_name, 'ItemPrefab')# my_struct
-        elif v_ty == 'TextureParameterValues':
-            mi_apply_texture_parameter(uvalue, value)
-            # uvalue = create_linked_asset(value)
-        elif v_ty == 'ScalarParameterValues':
-            uvalue = value if is_builtin else getattr(unreal, v_ty)()
-            if not is_builtin:
-                mi_apply_scalar_parameter(uvalue, value)
-            #if 'ParameterValue' in value['ScalarParameterValues']:
-            #    material_util.set_material_instance_scalar_parameter_value(my_mi, key,
-            #                                                               data_dict['ScalarParameterValues'][key][
-            #                                                                   'ParameterValue'])
-            #else:
-            #    print("WARNING:  Scalar Parameter Value for " + key + " not found in MI " + mi_obj.asset_name)
-            #
-            #uvalue = value
-        elif v_ty == 'VectorParameterValues':
-            mi_apply_vector_parameter(uvalue, value)
-            #temp_asset = unreal.LinearColor()
-            #apply(temp_asset, value)
-            #uvalue = temp_asset
         elif v_ty == 'PhoenixDynamicBoneBinariesItem':
             my_struct = unreal.DynamicBoneDataStruct() # Array(unreal.PhoenixDynamicBoneBinary) # unreal.DesignAssignStruct()
             apply(my_struct,value)
@@ -331,7 +318,6 @@ def update_array(m_prop, data, ty):
             my_struct = unreal.DesignAssignStruct()
             apply(my_struct, value)
             uvalue = my_struct
-
         else:
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
             if not is_builtin: apply(uvalue, value)
@@ -349,7 +335,7 @@ def set_editor_property(obj, key, value):
     except:
         return
     ty = type(prop)
-    print("Running set_editor_property on type " + str(ty))
+    print("Running set_editor_property on type " + str(ty) + " with key "+str(key)) #+" and value "+str(value))
 
 
     #print("Processing key: ")
@@ -358,10 +344,13 @@ def set_editor_property(obj, key, value):
     #print(ty)
 
     if ty in (unreal.Name, str, float, bool, int):
+        print("peek:  Found primitive for key "+ key)
         obj.set_editor_property(key, value)
     elif unreal.EnumBase in ty.__mro__:
+        print("peek:  Found enum for key "+ key)
         obj.set_editor_property(key, str_to_enum(value))
     elif ty is unreal.Map:
+        print("peek:  Found map for key "+ key)
         if len(value) > 0:
             map_ty = try_get_map_type(obj, key)
             if map_ty is None: 
@@ -369,11 +358,34 @@ def set_editor_property(obj, key, value):
             else:
                 obj.set_editor_property(key, update_map(prop, value, map_ty))
     elif isinstance(value, dict) and "ObjectName" in value:
-        obj.set_editor_property(key, create_linked_asset(value))
+        print("peek:  Found linked asset for key "+ key)
+        if type(obj)==unreal.MaterialInstanceConstant and key=='SubsurfaceProfile':
+            print("Found SubsurfaceProfile in MI JSON")
+            obj_type, obj_name = value["ObjectName"].split("'")[:2]
+            # print("Received object with type "+obj_type)
+            # print("Received object with name "+obj_name)
+
+            # print(f"Processing texture {obj_name}...")
+            obj_path = '/'.join(value["ObjectPath"].split(".")[0].split('/')[:-1])
+
+            print('SSP path is ' + obj_path)
+            print('SSP name is ' + obj_name)
+            print('SSP type is ' + obj_type)
+
+            my_ssp = try_create_asset(obj_path, obj_name, obj_type)
+            obj.set_editor_property('override_subsurface_profile', True)
+            print("Setting SubsurfaceProfile to " + my_ssp.get_full_name())
+            obj.set_editor_property('subsurface_profile', my_ssp)
+
+            obj.get_editor_property('base_property_overrides').set_editor_property('shading_model',
+                                                                                     unreal.MaterialShadingModel.MSM_SUBSURFACE_PROFILE)  # TODO:  is this always correct if SubsurfaceProfile is in the JSON ?
+        else:
+            obj.set_editor_property(key, create_linked_asset(value))
     elif isinstance(value, dict) and "AssetPathName" in value:
-        print("Found a recursive asset pointer.")
+        print("Found a recursive asset pointer for key "+ key)
         obj.set_editor_property(key, create_recursive_linked_asset(key, value))
     elif unreal.StructBase in ty.__mro__:
+        print("peek:  Found struct for key "+ key)
         apply(prop, value)
     elif ty is unreal.Array: #y.__name__ in 'Array':
         print("peek:  Found array of length "+str(len(value)) + " for key "+ key)
@@ -382,7 +394,16 @@ def set_editor_property(obj, key, value):
             print("prop is"+str(prop))
             print("value is"+str(value))
             print("array_ty is"+str(array_ty))
-            obj.set_editor_property(key, update_array(prop, value, array_ty))
+            if type(obj)==unreal.MaterialInstanceConstant and array_ty['Value'] == 'TextureParameterValues':
+                mi_apply_texture_parameters(obj, value)
+                # mi_apply_texture_parameter(uvalue, value)
+                # uvalue = create_linked_asset(value)
+            elif type(obj)==unreal.MaterialInstanceConstant and array_ty['Value'] == 'ScalarParameterValues':
+                mi_apply_scalar_parameters(obj, value)
+            elif type(obj)==unreal.MaterialInstanceConstant and array_ty['Value'] == 'VectorParameterValues':
+                mi_apply_texture_parameters(obj, value)
+            else:
+                obj.set_editor_property(key, update_array(prop, value, array_ty))
         #for array_idx in range(len(value)):
         #    prop.append('1') #create_array_elem_property(obj,key,value[array_idx])) #'0')
         #    temp = create_array_elem_property(obj,key,value[array_idx]) #key+'['+str(array_idx)+']',value[array_idx])
@@ -397,13 +418,16 @@ def apply(asset, data : dict):
     for key in data:
         set_editor_property(asset, key, data[key])
     
-def mi_apply_scalar_parameter(my_mi, data : dict):
-    material_util.set_material_instance_scalar_parameter_value(my_mi, data["ParameterInfo"]["Name"], data['ParameterValue'])
-    print("Running mi_apply_scalar_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())
-
-def mi_apply_vector_parameter(my_mi, data : dict):
-    dict_with_rgba = data['ParameterValue']
-    material_util.set_material_instance_vector_parameter_value(my_mi,
+def mi_apply_scalar_parameters(my_mi, data_array):
+    for data in data_array:
+        print("Running mi_apply_scalar_parameter on parameter with name "+data["ParameterInfo"]["Name"]+" and value "+str(data["ParameterValue"]))
+        material_util.set_material_instance_scalar_parameter_value(my_mi, data["ParameterInfo"]["Name"], data['ParameterValue'])
+def mi_apply_vector_parameters(my_mi, data_array):
+    for data in data_array:
+        dict_with_rgba = data['ParameterValue']
+        print("Running mi_apply_vector_parameter on parameter with name " + data["ParameterInfo"][
+            "Name"] + " and value " + str(data["ParameterValue"]))
+        material_util.set_material_instance_vector_parameter_value(my_mi,
                                                                    data["ParameterInfo"]["Name"],
                                                                    unreal.LinearColor(
                                                                         r=dict_with_rgba['R'],
@@ -412,48 +436,37 @@ def mi_apply_vector_parameter(my_mi, data : dict):
                                                                         a=dict_with_rgba['A']
                                                                    )
                                                                    )
-    print("Running mi_apply_vector_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())
+    # print("Running mi_apply_vector_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())
 
-def mi_apply_texture_parameter(my_mi, p : dict):
-    key = p["ParameterInfo"]["Name"]
-    if 'ParameterValue' in p:
-        if not (p["ParameterValue"] is None):
-            obj_type, obj_name = p["ParameterValue"]["ObjectName"].split("'")[:2]
-            # print("Received object with type "+obj_type)
-            # print("Received object with name "+obj_name)
+def mi_apply_texture_parameters(my_mi, p_array):
+    for p in p_array:
+        key = p["ParameterInfo"]["Name"]
+        if 'ParameterValue' in p:
+            if not (p["ParameterValue"] is None):
+                obj_type, obj_name = p["ParameterValue"]["ObjectName"].split("'")[:2]
+                # print("Received object with type "+obj_type)
+                # print("Received object with name "+obj_name)
 
-            #print(f"Processing texture {obj_name}...")
-            obj_path = p["ParameterValue"]["ObjectPath"]
-            # windows_texture_path = (texture_root + ('\\').join(obj_path.split('/'))).split('.')[0] + '.tga'
+                #print(f"Processing texture {obj_name}...")
+                obj_path = p["ParameterValue"]["ObjectPath"]
+                # windows_texture_path = (texture_root + ('\\').join(obj_path.split('/'))).split('.')[0] + '.tga'
 
-            #print(f"Path={obj_path}")
-            #print(f"windows_texture_path={windows_texture_path}")
+                #print(f"Path={obj_path}")
+                #print(f"windows_texture_path={windows_texture_path}")
 
-            full_path = obj_path.split(".")[0] + "." + obj_name
-            asset = unreal.load_asset(f"{obj_type}'{full_path}'")
+                full_path = obj_path.split(".")[0] + "." + obj_name
+                asset = unreal.load_asset(f"{obj_type}'{full_path}'")
 
-            if asset is None:
-                folder = "/".join(obj_path.split(".")[0].split("/")[:-1])
-                asset = try_create_asset(folder, obj_name, obj_type)
+                if asset is None:
+                    folder = "/".join(obj_path.split(".")[0].split("/")[:-1])
+                    asset = try_create_asset(folder, obj_name, obj_type)
 
-            if asset is not None:
-                unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+                if asset is not None:
+                    unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
 
-            # slot_name = p["ParameterInfo"]["Name"]
+                # slot_name = p["ParameterInfo"]["Name"]
 
-            #print(f"Adding texture {full_path} to slot {slot_name}")
+                #print(f"Adding texture {full_path} to slot {slot_name}")
 
-            material_util.set_material_instance_texture_parameter_value(my_mi, key , asset)
+                material_util.set_material_instance_texture_parameter_value(my_mi, key , asset)
 
-
-    dict_with_rgba = data['ParameterValue']
-    material_util.set_material_instance_vector_parameter_value(my_mi,
-                                                                   data["ParameterInfo"]["Name"],
-                                                                   unreal.LinearColor(
-                                                                        r=dict_with_rgba['R'],
-                                                                        g=dict_with_rgba['G'],
-                                                                        b=dict_with_rgba['B'],
-                                                                        a=dict_with_rgba['A']
-                                                                   )
-                                                                   )
-    print("Running mi_apply_vector_parameter on asset "+str(my_mi)) # +" with data "+str(data)+" with type "+str())

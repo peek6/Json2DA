@@ -26,3 +26,8 @@ chunk_id_bases['pants'] = 671
 # Use 700's for shoes and stockings (either replacing the leg/feet MIs or not)
 
 # Use 800's for hair and skin colors
+chunk_id_bases['face'] = {}
+chunk_id_bases['face']['alisa'] = 846
+chunk_id_bases['face']['leo'] = 848
+chunk_id_bases['face']['women'] = 850
+chunk_id_bases['face']['men'] = 870

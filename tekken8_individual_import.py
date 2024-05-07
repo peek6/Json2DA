@@ -25,8 +25,8 @@ import json
 def main():
     # TODO: Set this before running the script
     json_paths = [
-        r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\model\unique\cat\face\cat_fac\materials\MI_cat_face_test.json"
-        
+        r"D:\modding\T8_Demo\Exports\Polaris\Content\Lobby\Character\Prefab\Accessories\AIP_LCH_acc_joystick_002.json"
+        #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\model\unique\cat\face\cat_fac\materials\MI_cat_face_test.json"
         #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\kal\bdf\CI_kal_bdf_1p_p.json",
         #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\kal\bdf\CI_kal_bdf_1p_v2.json",
         #r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\KAL\materials\MI_CH_kal_arm_skin.json",

@@ -150,6 +150,7 @@ chars_dict['men'] = {
 'bsn':'Steve',
 'cht':'Bryan',
 'ctr':'Claudio',
+'dog':'Eddy',
 'grf':'Paul',
 'grl':'Kazuya',
 'hrs':'Shaheen',
@@ -182,4 +183,10 @@ chars_dict['other'] = {
 
 # TODO: Leo is sometimes _f_ and sometimes _m_ depending on part, so I should really index by both part and char_type here in general.
 #  This should work for everyone else and should work for Leo if you manually change it based on what char parts you're modding for them
-char_type_letter_dict = {'men':'_m_', 'women':'_f_', 'alisa':'_f_', 'leo':'_f_', 'other':'_m_'}
+char_type_letter_dict = {
+    'men':'_m_',
+    'women':'_f_',
+    'alisa':'_f_',
+    'leo':'_f_',
+    'other':'_m_'
+}

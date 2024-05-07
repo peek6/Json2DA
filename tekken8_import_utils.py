@@ -33,6 +33,11 @@ def generic_tekken8_importer(json_path, asset_name, asset_path):
         apply(asset, data)
         unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
         unreal.EditorAssetLibrary.save_asset(asset_path + '/' + asset_name)
+    elif "AIP_" in asset_name:
+        asset = unreal.AvatarItemPrefab()
+        apply(asset, data)
+        unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
+        unreal.EditorAssetLibrary.save_asset(asset_path + '/' + asset_name)
     elif "MI_" in asset_name:
         print("Running latest MI import")
         mi_obj = MaterialInstance(asset_path, asset_name, json_path)
@@ -82,6 +87,7 @@ def generic_tekken8_importer(json_path, asset_name, asset_path):
                     unreal.EditorAssetLibrary.delete_loaded_asset(asset)  # asset_path + asset_name)
 
                 create_ue_material_instance(mi_obj)
+                return mi_obj
             else:
                 print("WARNING:  No parent name for MI " + asset_name)
         else:

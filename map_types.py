@@ -23,6 +23,10 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "DesignAssignArray"
     },
+    "OverrideMaterials": {
+        "Key": "",
+        "Value": "__AssetRef"
+    },
     "PhoenixDynamicBoneBinariesItem": {
         "Key": "",
         "Value": "PhoenixDynamicBoneBinariesItem"
