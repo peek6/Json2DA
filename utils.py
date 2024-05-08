@@ -318,6 +318,11 @@ def update_array(m_prop, data, ty):
             my_struct = unreal.DesignAssignStruct()
             apply(my_struct, value)
             uvalue = my_struct
+        elif v_ty == 'EyeParamArray':
+            # TODO:  Create a struct here
+            my_struct = unreal.BaseEyeItemOneEye()
+            apply(my_struct, value)
+            uvalue = my_struct
         else:
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
             if not is_builtin: apply(uvalue, value)

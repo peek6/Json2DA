@@ -11,6 +11,10 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "str"
     },
+    "EyeParamArray": {
+        "Key": "",
+        "Value": "EyeParamArray"
+    },
     "DesignAssignSlotArray":{
         "Key": "",
         "Value": "DesignAssignSlotArray"
@@ -24,6 +28,14 @@ ARRAY_TYPES = {
         "Value": "DesignAssignArray"
     },
     "OverrideMaterials": {
+        "Key": "",
+        "Value": "__AssetRef"
+    },
+    "Sclera_Param": {
+        "Key": "",
+        "Value": "__AssetRef"
+    },
+    "IrisColor_Param": {
         "Key": "",
         "Value": "__AssetRef"
     },
@@ -266,6 +278,12 @@ FACTORY_MAP = {
     ],
     "BaseItem": [
         "BaseItemFactory"
+    ],
+    "BaseMakeItem": [
+        "BaseMakeItemFactory"
+    ],
+    "BaseEyeItem": [
+        "BaseEyeItemFactory"
     ],
     "BasicOverlays": [
         "BasicOverlaysFactory",

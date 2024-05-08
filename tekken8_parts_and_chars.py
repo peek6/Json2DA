@@ -150,7 +150,6 @@ chars_dict['men'] = {
 'bsn':'Steve',
 'cht':'Bryan',
 'ctr':'Claudio',
-'dog':'Eddy',
 'grf':'Paul',
 'grl':'Kazuya',
 'hrs':'Shaheen',
@@ -163,7 +162,8 @@ chars_dict['men'] = {
 'pig':'Law',
 'snk':'Hwoarang',
 'swl':'Devil_Jin',
-'wlf':'Lee'
+'wlf':'Lee',
+'dog':'Eddy'
 }
 
 # Alisa works differently, although her lowers could theoretically be included with women if they are compatible with all existing upper body parts

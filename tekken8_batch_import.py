@@ -4,8 +4,8 @@
 # Usage:
 # Extract all JSON files using Fmodel
 # Set export_root to the root (e.g., parent dir) of Content in your Fmodel JSON extraction folder
-# List the prefixes for the types you want to import in types_to_import (e.g., SBA, CI, etc.)
-# Currently supports batch importing SBA and CI files
+# List the prefixes for the types you want to import in types_to_import (e.g., SBA, CI, BEI, BMI, etc.)
+# Currently supports batch importing SBA, CI, and BEI files.  Other types (such as BMI) might work but not yet tested.
 # Known issues:  very slow and prone to crash UE.  TODO:  Convert to using factories
 # Highly recommend deleting all files of the target type from your project before running this script or UE will ask if you want to replace each one.
 
@@ -29,7 +29,7 @@ def main():
     export_root = r"D:\modding\T8_Demo\Exports\Polaris"
 
     #TODO:  Set file types to import
-    types_to_import = ['SBA']
+    types_to_import = ['BEI']
 
     p = Path(export_root)
 

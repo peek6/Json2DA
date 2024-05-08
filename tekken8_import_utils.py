@@ -28,6 +28,14 @@ def generic_tekken8_importer(json_path, asset_name, asset_path):
         # unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
         # unreal.EditorAssetLibrary.save_asset(asset_path + asset_name)
         unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    elif "BEI_" in asset_name:
+        asset = try_create_asset(asset_path, asset_name, 'BaseEyeItem')
+        apply(asset, data)
+        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    elif "BMI_" in asset_name:
+        asset = try_create_asset(asset_path, asset_name, 'BaseMakeItem')
+        apply(asset, data)
+        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
     elif "SBA_" in asset_name:
         asset = unreal.SqueezeBoneAsset()
         apply(asset, data)
