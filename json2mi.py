@@ -105,7 +105,7 @@ def main(json_path):
     print("Running generic_tekken8_importer import with JSON path = "+ json_path.file_path + ", asset_name="+asset_name+", asset_path="+asset_path)
 
     generic_tekken8_importer(json_path.file_path, asset_name, asset_path)
-    unreal.EditorAssetLibrary.save_loaded_asset(mi_asset, True)
+    unreal.EditorAssetLibrary.save_loaded_asset(mi_asset, False)
 
 
 '''

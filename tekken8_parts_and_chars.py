@@ -140,7 +140,8 @@ chars_dict['women'] = {
     'hms': 'lili',
     'kal': 'nina',
     'rat': 'xiaoyu',
-    'zbr': 'reina'
+    'zbr': 'reina',
+    'cbr': 'lidia'
 }
 
 # use chunks 870-892, 870 = all men
@@ -163,7 +164,8 @@ chars_dict['men'] = {
 'snk':'Hwoarang',
 'swl':'Devil_Jin',
 'wlf':'Lee',
-'dog':'Eddy'
+'dog':'Eddy',
+'bee':'Heihachi'
 }
 
 # Alisa works differently, although her lowers could theoretically be included with women if they are compatible with all existing upper body parts

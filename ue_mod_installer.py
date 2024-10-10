@@ -11,9 +11,10 @@
 import shutil
 
 # Specify these 3
-ue_pak_dir = r'D:\ue_build\polaris_custom_git_proj\Windows\Polaris\Content\Paks'
-mod_dir = r'D:\SteamLibrary\steamapps\common\TEKKEN 8\Polaris\Content\Paks\LogicMods'
-chunks_to_install = [] # [593] # , 1001]#  [20, 791, 794, 796, 598] # , 852]# [654, 790, 791, 792, 793, 794, 795, 895, 896] #[895, 896, 954] #  Example:  [10, 11, 190, 194, 195, 196, 250, 295, 296, 299]
+ue_pak_dir = r'c:\ue_build\polaris_custom_git_proj\Windows\Polaris\Content\Paks'
+#ue_pak_dir = r'D:\polar_project_custom_git\Saved\StagedBuilds\Windows\Polaris\Content\Paks'
+mod_dir = r'C:\Program Files (x86)\Steam\steamapps\common\TEKKEN 8\Polaris\Content\Paks\LogicMods'
+chunks_to_install = [781, 1295] # [591, 592, 593, 598, 1295] # [734, 1772] # [751, 752, 753, 754, 755, 756, 757, 758, 759, 1171, 1771] #[783] # , 789, 1001] # [784, 793, 794, 795] # [249] # [591, 592, 598, 789, 1024] # [786, 787, 788, 789] # [592, 598, 786, 787, 788, 789, 1024]# [1048] # 593, 598, 1048] # [593] # , 1001]#  [20, 791, 794, 796, 598] # , 852]# [654, 790, 791, 792, 793, 794, 795, 895, 896] #[895, 896, 954] #  Example:  [10, 11, 190, 194, 195, 196, 250, 295, 296, 299]
 
 
 exts = ['.utoc','.ucas','.pak']

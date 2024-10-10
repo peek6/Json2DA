@@ -11,6 +11,10 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "str"
     },
+    "DependencySkeletalMeshSetArray": {
+        "Key": "",
+        "Value": "DependencySkeletalMeshSetArray"
+    },
     "EyeParamArray": {
         "Key": "",
         "Value": "EyeParamArray"
@@ -59,13 +63,17 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "RawData"
     },
+    "SqueezeBoneInfoArray": {
+        "Key": "",
+        "Value": "SqueezeInfoStruct"
+    },
     "ScalarParameterValues":{
         "Key": "",
         "Value": "ScalarParameterValues"
     },
     "VectorParameterValues": {
         "Key": "",
-        "Value": "ScalarParameterValues"
+        "Value": "VectorParameterValues"
     },
     "TextureParameterValues": {
         "Key": "",
@@ -176,6 +184,10 @@ MAP_TYPES = {
     "SubSectionRanges": {
         "Key": "Guid",
         "Value": "MovieSceneFrameRange"
+    },
+    "SqueezeBoneDataArray": {
+        "Key": "str",
+        "Value": "SqueezeBoneData"
     },
     "UserParameterRedirects": {
         "Key": "NiagaraVariable",

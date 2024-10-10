@@ -323,6 +323,10 @@ def update_array(m_prop, data, ty):
             my_struct = unreal.BaseEyeItemOneEye()
             apply(my_struct, value)
             uvalue = my_struct
+        elif v_ty == 'DependencySkeletalMeshSetArray':
+            my_struct = unreal.DependencySkeletalMeshRigSet()
+            apply(my_struct, value)
+            uvalue = my_struct
         else:
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
             if not is_builtin: apply(uvalue, value)
@@ -399,14 +403,17 @@ def set_editor_property(obj, key, value):
             print("prop is"+str(prop))
             print("value is"+str(value))
             print("array_ty is"+str(array_ty))
-            if type(obj)==unreal.MaterialInstanceConstant and array_ty['Value'] == 'TextureParameterValues':
-                mi_apply_texture_parameters(obj, value)
-                # mi_apply_texture_parameter(uvalue, value)
-                # uvalue = create_linked_asset(value)
-            elif type(obj)==unreal.MaterialInstanceConstant and array_ty['Value'] == 'ScalarParameterValues':
-                mi_apply_scalar_parameters(obj, value)
-            elif type(obj)==unreal.MaterialInstanceConstant and array_ty['Value'] == 'VectorParameterValues':
-                mi_apply_texture_parameters(obj, value)
+            if type(obj)==unreal.MaterialInstanceConstant:
+                if array_ty['Value'] == 'TextureParameterValues':
+                    mi_apply_texture_parameters(obj, value)
+                    # mi_apply_texture_parameter(uvalue, value)
+                    # uvalue = create_linked_asset(value)
+                elif array_ty['Value'] == 'VectorParameterValues':
+                    mi_apply_vector_parameters(obj, value)
+                elif array_ty['Value'] == 'ScalarParameterValues':
+                    mi_apply_scalar_parameters(obj, value)
+                else:
+                    obj.set_editor_property(key, update_array(prop, value, array_ty))
             else:
                 obj.set_editor_property(key, update_array(prop, value, array_ty))
         #for array_idx in range(len(value)):

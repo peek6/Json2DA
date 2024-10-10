@@ -15,10 +15,17 @@ from utils import apply, try_create_asset
 from materialutil import create_ue_material_instance
 import json
 
-def generic_tekken8_importer(json_path, asset_name, asset_path):
-    with open(json_path, "r+") as fp:
-        data = json.load(fp)[0]["Properties"]
+def generic_tekken8_importer(json_path, asset_name, asset_path, texture_root = ''):
 
+
+
+    with open(json_path, "r+") as fp:
+        temp_buffer = json.load(fp)[0]
+        if "Properties" in temp_buffer:
+            data = temp_buffer["Properties"]
+        else:
+            print("Warning:  JSON file has no properties to populate")
+            data = {}
 
     if "BEI_" in asset_name:
         asset = try_create_asset(asset_path, asset_name, 'BaseEyeItem')
@@ -26,6 +33,10 @@ def generic_tekken8_importer(json_path, asset_name, asset_path):
         unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
     elif "BMI_" in asset_name:
         asset = try_create_asset(asset_path, asset_name, 'BaseMakeItem')
+        apply(asset, data)
+        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    elif "BCI_" in asset_name:
+        asset = try_create_asset(asset_path, asset_name, 'BaseCharacterItem')
         apply(asset, data)
         unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
     elif "SBA_" in asset_name:
@@ -94,7 +105,7 @@ def generic_tekken8_importer(json_path, asset_name, asset_path):
                     asset = unreal.load_asset(asset_path + '/' + asset_name)  # + '.' + asset_name)
                     unreal.EditorAssetLibrary.delete_loaded_asset(asset)  # asset_path + asset_name)
 
-                create_ue_material_instance(mi_obj)
+                create_ue_material_instance(mi_obj, texture_root)
                 return mi_obj
             else:
                 print("WARNING:  No parent name for MI " + asset_name)

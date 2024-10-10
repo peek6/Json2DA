@@ -25,11 +25,17 @@ import json
 def main():
     # Set these next 2 parameters before running the script
 
-    # TODO: Set this to root of Content in Fmodel JSON extraction folder
-    export_root = r"D:\modding\T8_Demo\Exports\Polaris"
+    # TODO: Set this to root of Game in Umodel texture TGA extraction folder
+    texture_root = r"D:\modding\T8\vanilla_textures"
+
+    # TODO: Set this to root of Content in Fmodel JSON extraction folder, or to the root folder for the assets you want to batch import
+    # export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Item_Prefab\kal\sho"
+    #export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\model\unique\cbr\face\cbr_fac\Materials"
+    #export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\cbr\Materials"
+    export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Squeeze_Bone_Asset"
 
     #TODO:  Set file types to import
-    types_to_import = ['BEI']
+    types_to_import = ['SBA']
 
     p = Path(export_root)
 
@@ -54,9 +60,9 @@ def main():
                 else:
                     if(found_content):
                         tokens_after_content.append(token)
-            asset_path = '/'+'/'.join(tokens_after_content)+'/'
+            asset_path = '/'+'/'.join(tokens_after_content) #+'/'
             print("Importing " + json_path +" into "+asset_path+asset_name)
-            tekken8_import_utils.generic_tekken8_importer(json_path, asset_name, asset_path)
+            tekken8_import_utils.generic_tekken8_importer(json_path, asset_name, asset_path, texture_root)
             type_idx[type_to_import] = type_idx[type_to_import]+1
             global_idx = global_idx+1
 
