@@ -23,7 +23,12 @@ chunk_id_bases['shirts'] = 605
 chunk_id_bases['skirts'] = 655
 chunk_id_bases['pants'] = 671
 
+
+
 # Use 700's for shoes and stockings (either replacing the leg/feet MIs or not)
+chunk_id_bases['shoes'] = 712
+chunk_id_bases['shoes_with_pantyhose'] = 740
+chunk_id_bases['shoes_with_stockings'] = 750
 
 # Use 800's for hair and skin colors
 chunk_id_bases['face'] = {}

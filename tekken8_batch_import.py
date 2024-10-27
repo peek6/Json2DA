@@ -29,13 +29,10 @@ def main():
     texture_root = r"D:\modding\T8\vanilla_textures"
 
     # TODO: Set this to root of Content in Fmodel JSON extraction folder, or to the root folder for the assets you want to batch import
-    # export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Item_Prefab\kal\sho"
-    #export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\model\unique\cbr\face\cbr_fac\Materials"
-    #export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\unique_body\cbr\Materials"
-    export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Squeeze_Bone_Asset"
+    export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item"
 
     #TODO:  Set file types to import
-    types_to_import = ['SBA']
+    types_to_import = ['DYB_CH']
 
     p = Path(export_root)
 
@@ -69,42 +66,7 @@ def main():
     for type_to_import in types_to_import:
         print("Imported " + str(type_idx[type_to_import]) + " "+type_to_import+" assets.")
     print("Imported a total of "+str(global_idx)+" assets.")
-            #if(idx==1):
-            #    return
-            #print(asset_path)
-            #print(asset_name)
 
-            # print(file)
-
-
-
-
-
-'''
-    assets_to_import.append(
-        '/Content/Character/Item/Customize_Item/cf0/sho/CI_cf0_sho_f_furshortboots'
-        # '/Content/Character/Item/Customize_Item/cf0/bdu/CI_cf0_bdu_f_shirtinss_dot',
-        # '/Content/Character/Item/Customize_Item/mnt/bdu/CI_mnt_bdu_f_shirtinss_dot'
-
-        # '/Content/Character/Item/Customize_Item/cf0/sho/CI_cf0_sho_f_sandals'
-        # '/Content/Character/Item/Customize_Item/cf0/bdu/CI_cf0_bdu_f_mlongcoat_houndstooth'
-        # '/Content/Character/Item/Customize_Item/zbr/bdf/CI_zbr_bdf_1p'
-        # '/Content/Character/Item/Customize_Item/cf0/btm/CI_cf0_btm_f_widepants_denim',
-        # '/Content/Character/Item/Customize_Item/cf0/btm/CI_cf0_btm_f_hotpants',
-        # '/Content/Character/Item/Customize_Item/cf0/btm/CI_cf0_btm_f_mdenim',
-
-        # '/Content/Character/Item/Customize_Item/rat/bdf/CI_rat_bdf_phoenix_dress',
-        # '/Content/Character/Item/Customize_Item/cf0/sho/CI_cf0_sho_f_officemule_khA'
-        ]
-
-    for asset_to_import in assets_to_import:
-        asset_name = asset_to_import.split('/')[-1]
-        editor_asset_path = '/'.join(asset_to_import.split('/')[:-1])
-
-        asset_path = '/Game'+"/"+("/").join(editor_asset_path.split('/')[2:]) + '/'
-        json_path = export_root + ("\\").join(editor_asset_path.split('/')) + ("\\") + asset_name + ".json"
-        tekken8_import_utils.generic_tekken8_importer(json_path, asset_name, asset_path)
-'''
 
 main()
 

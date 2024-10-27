@@ -27,6 +27,11 @@ def generic_tekken8_importer(json_path, asset_name, asset_path, texture_root = '
             print("Warning:  JSON file has no properties to populate")
             data = {}
 
+    if "DYB_CH_" in asset_name:
+        asset = unreal.PhoenixDynamicBoneBinary()
+        apply(asset, data)
+        unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
+        unreal.EditorAssetLibrary.save_asset(asset_path + '/' + asset_name)
     if "BEI_" in asset_name:
         asset = try_create_asset(asset_path, asset_name, 'BaseEyeItem')
         apply(asset, data)

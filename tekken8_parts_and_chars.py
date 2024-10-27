@@ -117,16 +117,22 @@ body_parts_dict['shoes'] = [
 'trailshoes'
 ]
 
-body_parts_dict['shoes_with_hose'] = [
+body_parts_dict['shoes_with_pantyhose'] = [
 'heellongboots_stA',
-'heellongboots_stB',
-'loaferC_khA',
 'loaferC_stA',
-'officemuletoe_khA',
 'officemuletoe_stA',
+'shortboots_stA'
+]
+
+body_parts_dict['shoes_with_stockings'] = [
+'loaferC_khA',
+'officemuletoe_khA'
+]
+
+body_parts_dict['shoes_with_fishnets'] = [
+'heellongboots_stB',
 'officemuletoe_stB',
 'sandals_khB',
-'shortboots_stA',
 'shortboots_stB'
 ]
 

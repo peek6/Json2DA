@@ -78,6 +78,10 @@ ARRAY_TYPES = {
     "TextureParameterValues": {
         "Key": "",
         "Value": "TextureParameterValues"
+    },
+    "UniqueCharacterEffects": {
+        "Key": "",
+        "Value": "ItemUniqueCharacterEffect"
     }
 
 
