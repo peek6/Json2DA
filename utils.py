@@ -213,11 +213,11 @@ def update_map(m_prop, data, ty):
             if v_ty is None: print(key)
         if v_ty == "__AssetRef":
             uvalue =  create_linked_asset(value)
-        if v_ty == 'Assign_Surface_Preset':
+        elif v_ty == 'Assign_Surface_Preset':
             my_asset = unreal.SurfacePreset()
             apply(my_asset, value)
             uvalue = my_asset
-        if v_ty == 'Assign_Surface_Data':
+        elif v_ty == 'Assign_Surface_Data':
             my_asset = unreal.SurfaceData()
             apply(my_asset, value)
             uvalue = my_asset
