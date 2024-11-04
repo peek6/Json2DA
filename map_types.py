@@ -3,6 +3,10 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "MeshOverride"
     },
+    "MaterialOverrides": {
+        "Key": "",
+        "Value": "MaterialOverride"
+    },
     "Rules": {
         "Key": "",
         "Value": "MeshRule"
@@ -145,6 +149,10 @@ MAP_TYPES = {
     "HouseMaterialParams": {
         "Key": "GearHouseID",
         "Value": ""
+    },
+    "Materials": {
+        "Key": "",
+        "Value": "MaterialInstanceConstant"
     },
     "TextureOverrides": {
         "Key": "",

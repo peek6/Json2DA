@@ -1,3 +1,10 @@
+# Script to batch import all outfit gear DAs from a directory
+
+# Usage:
+#  - In DIRECTORY, specify the directory with your outfit gear DA JSON files exported from Fmodel
+#  - In OUTPUT_BASE_PATH, specify the UE path to the outfit DA assets
+#  - I assume you first delete all your existing DA assets in UE before running this script.  If you want the script to be able to overwrite assets in UE, change OVERWRITE_EXISTING to True.
+
 import unreal
 import os
 from glob import glob
@@ -7,14 +14,11 @@ import utils
 importlib.reload(utils)
 from utils import apply, does_asset_exist, try_create_asset
 
-# ADD: r before "C:\String\Path" or use double \ to ensure 
-#      that the first character after \ isnt read as unicode. 
-# See: https://stackoverflow.com/a/1347854 for details
-DIRECTORY = r"F:\HL\GearAppearances"
+DIRECTORY = r"D:\games\tools\FModel\Output\Exports\Phoenix\Content\Data\GearAppearances\Outfit\Modded"
 
 DIRECTORY_GLOB = f"{DIRECTORY}\**\DA_*.json"
 OVERWRITE_EXISTING = False
-OUTPUT_BASE_PATH = "/Game/Data/GearAppearances/"
+OUTPUT_BASE_PATH = "/Game/Data/GearAppearances/Outfit/"  # peek:  for CreatorKit, use /your_mod_name/Data/GearAppearances/Outfit/
 
 SKIP_DIALOG = False
 
