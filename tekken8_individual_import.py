@@ -25,7 +25,10 @@ import json
 def main():
     # TODO: Set this before running the script
     json_paths = [
-        r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\rat\bdf\CI_rat_bdf_phoenix_dress.json",
+        r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\DynamicBone\DYB_Param_CAT.json",
+        # r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\shared\skeleton\aml\SKB_CH_aml_prp.json",
+        # r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\model\unique\bbn\extra\bbn_exp_bluecaw\meshes\DYB_CH_bbn_exp_bluecaw.json"
+        # r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\rat\bdf\CI_rat_bdf_phoenix_dress.json",
         # r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item\Customize_Item\cf0\sho\CI_cf0_sho_f_sandals.json"
         ]
 

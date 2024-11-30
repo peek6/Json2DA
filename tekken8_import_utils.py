@@ -16,9 +16,6 @@ from materialutil import create_ue_material_instance
 import json
 
 def generic_tekken8_importer(json_path, asset_name, asset_path, texture_root = ''):
-
-
-
     with open(json_path, "r+") as fp:
         temp_buffer = json.load(fp)[0]
         if "Properties" in temp_buffer:
@@ -26,13 +23,40 @@ def generic_tekken8_importer(json_path, asset_name, asset_path, texture_root = '
         else:
             print("Warning:  JSON file has no properties to populate")
             data = {}
-
-    if "DYB_CH_" in asset_name:
-        asset = unreal.PhoenixDynamicBoneBinary()
+    if "DYB_Param_" in asset_name:
+        asset = unreal.DynamicBoneParamAsset()
         apply(asset, data)
         unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
         unreal.EditorAssetLibrary.save_asset(asset_path + '/' + asset_name)
-    if "BEI_" in asset_name:
+    elif "DYB_CH_" in asset_name:
+        asset = unreal.PhoenixDynamicBoneBinary()
+        if 'RawData' in data:
+            asset.set_editor_property('RawData', data['RawData'])
+        else:
+            print("Warning:  No RawData found for asset:")
+            print(asset)
+        if 'Version' in data:
+            asset.set_editor_property('Version', data['Version'])
+        else:
+            print("Warning:  No Version found for asset:")
+            print(asset)
+        unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
+        unreal.EditorAssetLibrary.save_asset(asset_path + '/' + asset_name)
+    elif "SKB_" in asset_name:
+        asset = unreal.PhoenixSkeletonBinary()
+        if 'RawData' in data:
+            asset.set_editor_property('RawData', data['RawData'])
+        else:
+            print("Warning:  No RawData found for asset:")
+            print(asset)
+        if 'Version' in data:
+            asset.set_editor_property('Version', data['Version'])
+        else:
+            print("Warning:  No Version found for asset:")
+            print(asset)
+        unreal.AssetToolsHelpers.get_asset_tools().duplicate_asset(asset_name, asset_path, asset)
+        unreal.EditorAssetLibrary.save_asset(asset_path + '/' + asset_name)
+    elif "BEI_" in asset_name:
         asset = try_create_asset(asset_path, asset_name, 'BaseEyeItem')
         apply(asset, data)
         unreal.EditorAssetLibrary.save_loaded_asset(asset, False)

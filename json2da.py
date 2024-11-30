@@ -1,4 +1,7 @@
 import json
+import io
+from contextlib import redirect_stdout
+
 import unreal
 import importlib
 
@@ -19,7 +22,25 @@ def main(json_path):
             print("Warning:  JSON file has no properties to populate")
             data = {}
 
-        [apply(asset, data) for asset in sel_asset]
+
+
+        for asset in sel_asset:
+            with redirect_stdout(io.StringIO()) as f:
+                print(asset)
+            s = f.getvalue()
+            if ('PhoenixSkeletonBinary' in s) or ('PhoenixDynamicBoneBinary' in s):
+                if 'RawData' in data:
+                    asset.set_editor_property('RawData', data['RawData'])
+                else:
+                    print("Warning:  No RawData found for asset "+s)
+                if 'Version' in data:
+                    asset.set_editor_property('Version', data['Version'])
+                else:
+                    print("Warning:  No Version found for asset"+s)
+            else:
+                apply(asset, data)
+
+        # [apply(asset, data) for asset in sel_asset]
         for asset in sel_asset:
             unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
 

@@ -225,8 +225,21 @@ def update_map(m_prop, data, ty):
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
             if not is_builtin: apply(uvalue, value)
     
-       
-        m_prop[key] = uvalue
+        if k_ty == 'ItemPrefab':
+            print("peek:  converting to ItemPrefab pointer.")
+            print("key = "+key)
+            linked_ip_asset = unreal.load_asset(key)
+            if linked_ip_asset is None:
+                folder = "/".join(key.split(".")[0].split("/")[:-1])
+                obj_name = key.split(".")[1]
+                obj_type = 'ItemPrefab'
+                linked_ip_asset = try_create_asset(folder, obj_name, obj_type)
+                print(linked_ip_asset)
+                if linked_ip_asset is not None: unreal.EditorAssetLibrary.save_loaded_asset(linked_ip_asset, False)
+            linked_ip_asset = unreal.load_asset(key)
+            m_prop[linked_ip_asset] = uvalue
+        else:
+            m_prop[key] = uvalue
 
     return m_prop
 

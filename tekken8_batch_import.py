@@ -32,7 +32,7 @@ def main():
     export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item"
 
     #TODO:  Set file types to import
-    types_to_import = ['DYB_CH']
+    types_to_import = ['DYB_Param']
 
     p = Path(export_root)
 

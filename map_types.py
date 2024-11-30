@@ -51,6 +51,18 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "PhoenixDynamicBoneBinary"
     },
+    "PhoenixSkeletonBinary": {
+        "Key": "",
+        "Value": "PhoenixSkeletonBinary"
+    },
+    "DynamicBoneParam": {
+        "Key": "",
+        "Value": "DynamicBoneParam"
+    },
+    "DynamicBoneBustParam": {
+        "Key": "",
+        "Value": "DynamicBoneBustParam"
+    },
     "ItemPrefabSet": {
         "Key": "",
         "Value": "ItemPrefab"
@@ -83,9 +95,6 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "ItemUniqueCharacterEffect"
     }
-
-
-
 }
 
 MAP_TYPES = {
@@ -236,6 +245,34 @@ MAP_TYPES = {
     "Assign_Detail_AO_Normal_Map": {
         "Key": "",
         "Value": "__AssetRef"
+    },
+    "PhoenixDynamicBoneBinariesItem": {
+        "Key": "",
+        "Value": "PhoenixDynamicBoneBinariesItem"
+    },
+    "PhoenixDynamicBoneBinary": {
+        "Key": "",
+        "Value": "PhoenixDynamicBoneBinary"
+    },
+    "PhoenixSkeletonBinary": {
+        "Key": "",
+        "Value": "PhoenixSkeletonBinary"
+    },
+    "ItemPrefabSet": {
+        "Key": "",
+        "Value": "ItemPrefab"
+    },
+    "DynamicBoneParam": {
+        "Key": "",
+        "Value": "DynamicBoneParam"
+    },
+    "DynamicBoneBustParam": {
+        "Key": "",
+        "Value": "DynamicBoneBustParam"
+    },
+    "ItemBustParams": {
+        "Key": "ItemPrefab",
+        "Value": "DynamicBoneBustParam"
     }
 }
 
