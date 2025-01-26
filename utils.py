@@ -340,6 +340,18 @@ def update_array(m_prop, data, ty):
             my_struct = unreal.DependencySkeletalMeshRigSet()
             apply(my_struct, value)
             uvalue = my_struct
+        elif v_ty == 'CatwalkClothCollisionAsset':
+            my_struct = unreal.CatwalkClothCollisionAsset()
+            apply(my_struct, value)
+            uvalue = my_struct
+        elif v_ty == 'ClothOverrideCollisionDataAsset':
+            my_struct = unreal.ClothOverrideCollisionDataAsset()
+            apply(my_struct, value)
+            uvalue = my_struct
+        elif v_ty == 'CatwalkClothLcjOverrideDataAsset':
+            my_struct = unreal.ClothOverrideLcjDataAsset()
+            apply(my_struct, value)
+            uvalue = my_struct
         else:
             uvalue = value if is_builtin else  getattr(unreal, v_ty)()
             if not is_builtin: apply(uvalue, value)

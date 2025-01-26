@@ -47,7 +47,8 @@ def fmodel_dt_json_to_ue_dt_json(json_path):
         new_json = 'temp.json' # '\\'.join(json_path.file_path.split('\\')[:-1]+[(json_path.file_path.split('\\')[-1].split('.')[0]+'_for_UE'+'.json')]) # fmodel_json.split('\\')
         print('Writing UE formatted JSON to '+new_json)
         with open(new_json,'w') as fout:
-            fout.write(json.dumps(out_list))
+            json.dump(out_list, fout, indent=2)
+            # fout.write(json.dumps(out_list))
         #new_json = json.dumps(out_list)
 
     return struct_name, dt_name, new_json, my_dict, out_list

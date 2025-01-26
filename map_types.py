@@ -94,7 +94,20 @@ ARRAY_TYPES = {
     "UniqueCharacterEffects": {
         "Key": "",
         "Value": "ItemUniqueCharacterEffect"
+    },
+    "CatwalkClothCollisionAssetItem": {
+        "Key": "",
+        "Value": "CatwalkClothCollisionAsset"
+    },
+    "CatwalkClothCollisionOverrideDataAsset": {
+        "Key": "",
+        "Value": "ClothOverrideCollisionDataAsset"
+    },
+    "CatwalkClothLcjOverrideDataAsset": {
+        "Key": "",
+        "Value": "ClothOverrideLcjDataAsset"
     }
+
 }
 
 MAP_TYPES = {
@@ -273,6 +286,18 @@ MAP_TYPES = {
     "ItemBustParams": {
         "Key": "ItemPrefab",
         "Value": "DynamicBoneBustParam"
+    },
+    "CatwalkClothCollisionAssetItem": {
+        "Key": "",
+        "Value": "CatwalkClothCollisionAsset"
+    },
+    "CatwalkClothCollisionOverrideDataAsset": {
+        "Key": "",
+        "Value": "ClothOverrideCollisionDataAsset"
+    },
+    "CatwalkClothLcjOverrideDataAsset": {
+        "Key": "",
+        "Value": "ClothOverrideLcjDataAsset"
     }
 }
 

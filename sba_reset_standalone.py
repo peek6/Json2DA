@@ -1,5 +1,7 @@
 import unreal
 
+from utils import write_assets_to_chunk
+
 assets_to_set = [
 #'/Game/Character/Item/Squeeze_Bone_Asset/cf0/btm/SBA_f_dogi_damage_sho_f_heellongboots_in',
 #'/Game/Character/Item/Squeeze_Bone_Asset/cf0/btm/SBA_f_dogi_damage_sho_f_kunoichi_shoes_in',
@@ -59,6 +61,8 @@ assets_to_set = [
 '/Game/Character/Item/Squeeze_Bone_Asset/mnt/btm/SBA_mnt_f_tracksuit_sho_f_furshortboots_in'
 ]
 
+asset_list = []
+
 for my_asset_name in assets_to_set:
 
     asset = unreal.EditorAssetLibrary.load_asset(my_asset_name)
@@ -81,3 +85,11 @@ for my_asset_name in assets_to_set:
 
     asset.set_editor_property('squeeze_bone_data_array', my_dict)
     unreal.EditorAssetLibrary.save_asset(my_asset_name)
+
+    asset_list.append(asset)
+
+
+chunk_id = 10
+write_assets_to_chunk('/Game/chunks', 'chunk' + str(chunk_id) + '_ankle_gap_fix',
+                              chunk_id,
+                              asset_list)
