@@ -6,7 +6,7 @@
 # Usage:
 #  - Use Fmodel to extract all JSON files for all MMs and MIs.
 #  - Point json_root to the root of the Content folder in your Fmodel extraction directory
-#  - Point texture_root to the root of the Game folder in your Umodel texture extraction directory
+#  - Point texture_root to the root of the Character folder in your Umodel texture extraction directory
 #  - Back up all textures in your project
 #  - Back up and then delete all materials and material instances in your project
 #  - Run this script from inside your UE project
@@ -40,10 +40,10 @@ material_util = unreal.MaterialEditingLibrary()
 
 
 # TODO: Set this to root of Content in Fmodel JSON extraction folder
-json_root = r"D:\modding\T8_Demo\Exports\Polaris"
+json_root = r"D:\modding\ff7r_2\Exports\End"
 
 # TODO: Set this to root of Game in Umodel texture extraction folder
-texture_root = r"D:\modding\T8\vanilla_textures"
+texture_root = r"D:\modding\ff7r_2"
 
 
 param_types = ['ScalarParameterValues', 'TextureParameterValues', 'VectorParameterValues']
@@ -55,7 +55,7 @@ def initialize_material_classes():
     master_materials = {}
     material_instances = {}
 
-    for file in p.glob('**/M_*.json'):
+    for file in p.glob('**/Renderer/Material/RM_*.json'):
         json_path = str(file)
         with open(json_path, "r+") as fp:
             global_asset_type = json.load(fp)[0]["Type"]
@@ -81,22 +81,46 @@ def initialize_material_classes():
             else:
                 print("WARNING: " + asset_name+" is not a Material.  Skipping.")
 
-    for file in p.glob('**/MI_*.json'):
+    for file in p.glob('**/Renderer/**/*.json'):
         json_path = str(file)
-        tokens = json_path.split('\\')
-        asset_name = tokens[-1].split('.')[0]
-        tokens_after_content = []
-        found_content = False
-        for token in tokens[:-1]:
-            if (token == 'Content'):
-                found_content = True
-                tokens_after_content.append('Game')
-            else:
-                if (found_content):
-                    tokens_after_content.append(token)
-        asset_path = '/' + '/'.join(tokens_after_content) + '/'
-        new_material_instance = MaterialInstance(asset_path, asset_name, json_path)
-        material_instances[asset_name] = new_material_instance #.append(new_material_instance)
+        with open(json_path, "r+") as fp:
+            global_asset_type = json.load(fp)[0]["Type"]
+            if (global_asset_type == "MaterialInstanceConstant"):
+                tokens = json_path.split('\\')
+                asset_name = tokens[-1].split('.')[0]
+                tokens_after_content = []
+                found_content = False
+                for token in tokens[:-1]:
+                    if (token == 'Content'):
+                        found_content = True
+                        tokens_after_content.append('Game')
+                    else:
+                        if (found_content):
+                            tokens_after_content.append(token)
+                asset_path = '/' + '/'.join(tokens_after_content) + '/'
+                new_material_instance = MaterialInstance(asset_path, asset_name, json_path)
+                material_instances[asset_name] = new_material_instance #.append(new_material_instance)
+
+    #for file in p.glob('**/Character/Weapon/*Tifa*/**/*.json'):
+    for file in p.glob('**/Character/**/Material/*.json'):
+        json_path = str(file)
+        with open(json_path, "r+") as fp:
+            global_asset_type = json.load(fp)[0]["Type"]
+            if (global_asset_type == "MaterialInstanceConstant"):
+                tokens = json_path.split('\\')
+                asset_name = tokens[-1].split('.')[0]
+                tokens_after_content = []
+                found_content = False
+                for token in tokens[:-1]:
+                    if (token == 'Content'):
+                        found_content = True
+                        tokens_after_content.append('Game')
+                    else:
+                        if (found_content):
+                            tokens_after_content.append(token)
+                asset_path = '/' + '/'.join(tokens_after_content) + '/'
+                new_material_instance = MaterialInstance(asset_path, asset_name, json_path)
+                material_instances[asset_name] = new_material_instance #.append(new_material_instance)
 
     return master_materials, material_instances
 
@@ -130,7 +154,7 @@ def data_dict_to_data(my_obj):
 
 def main():
     master_materials, material_instances = initialize_material_classes()
-    
+
     # iterate through material instances and populate immediate parents and children
     for mi_name in material_instances:
         # open the JSON file for that material instance as a dict and populate its parent
@@ -183,8 +207,8 @@ def main():
             else:
                 print("WARNING: " + mi_name+" is not a MaterialInstanceConstant.  Skipping.")
                 del material_instances[mi_name]
-    
-    
+
+
     # For each material, traverse the tree starting from that material as root, and merge
     for mm_name in master_materials:
         mm_obj = master_materials[mm_name]
@@ -195,14 +219,17 @@ def main():
     # Convert the merged data dictionaries back into a list for compatibility with existing methods for constructing MMs and MIs in UE
     for mi_name in material_instances:
         data_dict_to_data(material_instances[mi_name])
-    
+
     for mm_name in master_materials:
         data_dict_to_data(master_materials[mm_name])
-    
-    
+
+
     # First create the master material in UE, then recursively create all its child material instances in UE, always creating parents before children
 
     #mm_name = 'M_CH_skin_V3'
+
+
+
     for mm_name in master_materials:
         mm_obj = master_materials[mm_name]
         print("Creating UE material "+mm_name)
@@ -212,13 +239,14 @@ def main():
             mi_obj = mm_obj.children[child_name]
             recursively_create_material_instances(mi_obj, texture_root)
 
+
     #create_ue_material_instance(material_instances['MI_CH_kal_face_skin'], texture_root)
     #create_ue_material_instance(material_instances['MI_CH_kal_arm_skin'], texture_root)
 
-    return master_materials, material_instances
+    return  # master_materials, material_instances
 
 
-master_materials, material_instances = main()
-
+# master_materials, material_instances = main()
+main()
 
 
