@@ -55,7 +55,7 @@ def initialize_material_classes():
     master_materials = {}
     material_instances = {}
 
-    for file in p.glob('**/Renderer/Material/RM_*.json'):
+    for file in p.glob('**/Renderer/Material/RM_Surface.json'):
         json_path = str(file)
         with open(json_path, "r+") as fp:
             global_asset_type = json.load(fp)[0]["Type"]
@@ -81,7 +81,7 @@ def initialize_material_classes():
             else:
                 print("WARNING: " + asset_name+" is not a Material.  Skipping.")
 
-    for file in p.glob('**/Renderer/**/*.json'):
+    for file in p.glob('**/Renderer/MaterialInstance/**/RMI_*.json'):
         json_path = str(file)
         with open(json_path, "r+") as fp:
             global_asset_type = json.load(fp)[0]["Type"]
@@ -152,101 +152,98 @@ def data_dict_to_data(my_obj):
             my_obj.data[my_type].append(my_obj.data_dict[my_type][dict_item])
     return
 
-def main():
-    master_materials, material_instances = initialize_material_classes()
+#def main():
+master_materials, material_instances = initialize_material_classes()
 
-    # iterate through material instances and populate immediate parents and children
-    for mi_name in material_instances:
-        # open the JSON file for that material instance as a dict and populate its parent
-        mi_obj = material_instances[mi_name]
-        with open(mi_obj.json_path, "r+") as fp:
-            my_temp = json.load(fp)[0]
-            data = my_temp["Properties"]
-            global_asset_type = my_temp["Type"]
-            # Sanity check that this is actually an MI
-            if(global_asset_type == "MaterialInstanceConstant"):
-                mi_obj.data = data
-                # Convert data list into data dictionary for easier merging (to avoid duplicate parameters)
-                for global_my_type in param_types:
-                    mi_obj.data_dict[global_my_type] = {}
-                    if(global_my_type in data):
-                        for list_item in data[global_my_type]:
-                            mi_obj.data_dict[global_my_type][list_item["ParameterInfo"]["Name"]] = list_item
-                if "SubsurfaceProfile" in data:
-                    print("Found SubsurfaceProfile in MI")
-                    mi_obj.data_dict["SubsurfaceProfile"] = {}
-                    mi_obj.data_dict["SubsurfaceProfile"]["ObjectName"] = mi_obj.data["SubsurfaceProfile"]["ObjectName"]
-                    mi_obj.data_dict["SubsurfaceProfile"]["ObjectPath"] = mi_obj.data["SubsurfaceProfile"]["ObjectPath"]
-                if 'Parent' in data:
-                    if 'ObjectName' in data['Parent']:
-                        temp_list = data['Parent']['ObjectName'].split("'")
-                        global_my_type = temp_list[0]
-                        my_parent_name = temp_list[1]
+# iterate through material instances and populate immediate parents and children
+for mi_name in material_instances:
+    # open the JSON file for that material instance as a dict and populate its parent
+    mi_obj = material_instances[mi_name]
+    with open(mi_obj.json_path, "r+") as fp:
+        my_temp = json.load(fp)[0]
+        data = my_temp["Properties"]
+        global_asset_type = my_temp["Type"]
+        # Sanity check that this is actually an MI
+        if(global_asset_type == "MaterialInstanceConstant"):
+            mi_obj.data = data
+            # Convert data list into data dictionary for easier merging (to avoid duplicate parameters)
+            for global_my_type in param_types:
+                mi_obj.data_dict[global_my_type] = {}
+                if(global_my_type in data):
+                    for list_item in data[global_my_type]:
+                        mi_obj.data_dict[global_my_type][list_item["ParameterInfo"]["Name"]] = list_item
+            if "SubsurfaceProfile" in data:
+                print("Found SubsurfaceProfile in MI")
+                mi_obj.data_dict["SubsurfaceProfile"] = {}
+                mi_obj.data_dict["SubsurfaceProfile"]["ObjectName"] = mi_obj.data["SubsurfaceProfile"]["ObjectName"]
+                mi_obj.data_dict["SubsurfaceProfile"]["ObjectPath"] = mi_obj.data["SubsurfaceProfile"]["ObjectPath"]
+            if 'Parent' in data:
+                if 'ObjectName' in data['Parent']:
+                    temp_list = data['Parent']['ObjectName'].split("'")
+                    global_my_type = temp_list[0]
+                    my_parent_name = temp_list[1]
 
-                        if global_my_type == 'Material':
-                            if my_parent_name in master_materials:
-                                my_parent_obj = master_materials[my_parent_name]
-                                mi_obj.parent = my_parent_obj  # my_parent_name
-                                my_parent_obj.children[mi_name] = mi_obj
-                            else:
-                                print("WARNING:  Cannot find parent material " + my_parent_name + " for MI " + mi_name)
-                        elif global_my_type=='MaterialInstanceConstant':
-                            if my_parent_name in material_instances:
-                                my_parent_obj = material_instances[my_parent_name]
-                                mi_obj.parent = my_parent_obj
-                                my_parent_obj.children[mi_name] = mi_obj
-                            else:
-                                print("WARNING:  Cannot find parent material instance " + my_parent_name + " for MI " + mi_name)
+                    if global_my_type == 'Material':
+                        if my_parent_name in master_materials:
+                            my_parent_obj = master_materials[my_parent_name]
+                            mi_obj.parent = my_parent_obj  # my_parent_name
+                            my_parent_obj.children[mi_name] = mi_obj
                         else:
-                            print("WARNING:  Unknown type "+ global_my_type +" for MI " + mi_name)
-
+                            print("WARNING:  Cannot find parent material " + my_parent_name + " for MI " + mi_name)
+                    elif global_my_type=='MaterialInstanceConstant':
+                        if my_parent_name in material_instances:
+                            my_parent_obj = material_instances[my_parent_name]
+                            mi_obj.parent = my_parent_obj
+                            my_parent_obj.children[mi_name] = mi_obj
+                        else:
+                            print("WARNING:  Cannot find parent material instance " + my_parent_name + " for MI " + mi_name)
                     else:
-                        print("WARNING:  No parent name for MI " + mi_name)
+                        print("WARNING:  Unknown type "+ global_my_type +" for MI " + mi_name)
+
                 else:
-                    print("WARNING:  No parent data for MI "+mi_name)
+                    print("WARNING:  No parent name for MI " + mi_name)
             else:
-                print("WARNING: " + mi_name+" is not a MaterialInstanceConstant.  Skipping.")
-                del material_instances[mi_name]
+                print("WARNING:  No parent data for MI "+mi_name)
+        else:
+            print("WARNING: " + mi_name+" is not a MaterialInstanceConstant.  Skipping.")
+            del material_instances[mi_name]
 
 
-    # For each material, traverse the tree starting from that material as root, and merge
-    for mm_name in master_materials:
-        mm_obj = master_materials[mm_name]
-        for global_my_type in param_types:
-            mm_obj.data_dict[global_my_type] = {}
-        recursively_merge_data(mm_obj)
+# For each material, traverse the tree starting from that material as root, and merge
+for mm_name in master_materials:
+    mm_obj = master_materials[mm_name]
+    for global_my_type in param_types:
+        mm_obj.data_dict[global_my_type] = {}
+    recursively_merge_data(mm_obj)
 
-    # Convert the merged data dictionaries back into a list for compatibility with existing methods for constructing MMs and MIs in UE
-    for mi_name in material_instances:
-        data_dict_to_data(material_instances[mi_name])
+# Convert the merged data dictionaries back into a list for compatibility with existing methods for constructing MMs and MIs in UE
+for mi_name in material_instances:
+    data_dict_to_data(material_instances[mi_name])
 
-    for mm_name in master_materials:
-        data_dict_to_data(master_materials[mm_name])
-
-
-    # First create the master material in UE, then recursively create all its child material instances in UE, always creating parents before children
-
-    #mm_name = 'M_CH_skin_V3'
+for mm_name in master_materials:
+    data_dict_to_data(master_materials[mm_name])
 
 
-
-    for mm_name in master_materials:
-        mm_obj = master_materials[mm_name]
-        print("Creating UE material "+mm_name)
-        create_ue_material(mm_obj, texture_root)
-        # recursively go through tree for each MM, add parent, then add children.  They are all MIs since I added the MM above.
-        for child_name in mm_obj.children:
-            mi_obj = mm_obj.children[child_name]
-            recursively_create_material_instances(mi_obj, texture_root)
+# First create the master material in UE, then recursively create all its child material instances in UE, always creating parents before children
 
 
-    #create_ue_material_instance(material_instances['MI_CH_kal_face_skin'], texture_root)
-    #create_ue_material_instance(material_instances['MI_CH_kal_arm_skin'], texture_root)
+for mm_name in master_materials:
+    mm_obj = master_materials[mm_name]
+    print("Creating UE material "+mm_name)
+    create_ue_material(mm_obj, texture_root)
+    # recursively go through tree for each MM, add parent, then add children.  They are all MIs since I added the MM above.
+    for child_name in mm_obj.children:
+        mi_obj = mm_obj.children[child_name]
+        recursively_create_material_instances(mi_obj, texture_root)
 
-    return  # master_materials, material_instances
 
 
-# master_materials, material_instances = main()
-main()
+
+# return  # master_materials, material_instances
+
+
+
+
+#main()
 
 

@@ -14,7 +14,7 @@ from pathlib import Path
 
 import unreal
 import utils
-import tekken8_import_utils
+import ff7rebirth_import_utils
 import importlib
 importlib.reload(utils)
 importlib.reload(tekken8_import_utils)

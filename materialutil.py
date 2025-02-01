@@ -310,7 +310,7 @@ def create_ue_material_instance(mi_obj, texture_root=''):
 
 
     unreal.EditorAssetLibrary.save_loaded_asset(my_mi, False)
-    return
+    return my_mi
 
 # recursively create all material instances in UE, creating parents before children
 def recursively_create_material_instances(mi_obj, texture_root=''):
