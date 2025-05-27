@@ -82,8 +82,20 @@ def generic_tekken8_importer(json_path, asset_name, asset_path, texture_root = '
         asset = try_create_asset(asset_path, asset_name, 'ItemPrefab')
         apply(asset, data)
         unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    elif "ECI_" in asset_name:
+        asset = try_create_asset(asset_path, asset_name, 'EffectCharacterItem')
+        apply(asset, data)
+        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    elif "ACI_" in asset_name:
+        asset = try_create_asset(asset_path, asset_name, 'AuraCharacterItem')
+        apply(asset, data)
+        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
     elif "CI_" in asset_name:
         asset = try_create_asset(asset_path, asset_name, 'CustomizeItem')
+        apply(asset, data)
+        unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
+    elif "CS_" in asset_name:
+        asset = try_create_asset(asset_path, asset_name, 'CustomizeSet')
         apply(asset, data)
         unreal.EditorAssetLibrary.save_loaded_asset(asset, False)
     elif "MI_" in asset_name:
