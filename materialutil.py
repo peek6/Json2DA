@@ -302,8 +302,10 @@ def create_ue_material_instance(mi_obj, texture_root=''):
                 #print(f"Adding texture {full_path} to slot {slot_name}")
 
                 material_util.set_material_instance_texture_parameter_value(my_mi, key , asset)
-                print(
-                    "Set TextureParameterValue " + key + "=" + asset.get_full_name())
+                if asset is not None:
+                    print("Set TextureParameterValue " + key + "=" + asset.get_full_name())
+                else:
+                    print("WARNING:  TextureParameterValue " + key + " is None.")
             else:
                 print("WARNING:  Texture Parameter Value for "+key+" not found in MI " + mi_obj.asset_name)
 
