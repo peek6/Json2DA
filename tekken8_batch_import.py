@@ -29,10 +29,10 @@ def main():
     texture_root = r"D:\modding\T8\vanilla_textures"
 
     # TODO: Set this to root of Content in Fmodel JSON extraction folder, or to the root folder for the assets you want to batch import
-    export_root = r"D:\modding\T8_Demo\Exports\Polaris\Content\Character\Item"
+    export_root = r"D:\Programs\FModel\Output\Exports\Polaris\Content\Character\Item"
 
     #TODO:  Set file types to import
-    types_to_import = ['DYB_Param']
+    types_to_import = ['ECI']
 
     p = Path(export_root)
 

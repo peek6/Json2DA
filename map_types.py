@@ -67,6 +67,18 @@ ARRAY_TYPES = {
         "Key": "",
         "Value": "ItemPrefab"
     },
+    "AuraEffectItems": {
+        "Key": "",
+        "Value": "RawData"
+    },
+    "BaseMakeItemSet": {
+        "Key": "",
+        "Value": "BaseMakeItem"
+    },
+    "ItemPrefabAccSet": {
+        "Key": "",
+        "Value": "ItemPrefab"
+    },
     "RawData": {
         "Key": "",
         "Value": "RawData"
@@ -351,6 +363,9 @@ FACTORY_MAP = {
     "AudioSynesthesiaNRTSettings": [
         "AudioSynesthesiaNRTSettingsFactory"
     ],
+    "AuraCharacterItem": [
+        "AuraCharacterItemFactory"
+    ],
     "BaseCharacterItem": [
         "BaseCharacterItemFactory"
     ],
@@ -472,6 +487,9 @@ FACTORY_MAP = {
     ],
     "EditorUtilityWidgetBlueprint": [
         "EditorUtilityWidgetBlueprintFactory"
+    ],
+    "EffectCharacterItem": [
+        "EffectCharacterItemFactory"
     ],
     "EndpointSubmix": [
         "EndpointSubmixFactory"
